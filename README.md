@@ -1,7 +1,7 @@
 
 # 🧬 Aurora (aurora-bioscience)
 
-Aurora is a specialized toolset designed for bioscience applications. This repository provides the official Homebrew tap for easy installation across various platforms.
+Aurora is a specialized toolset designed for bioscience applications search using the NASA OSDR API. v6.0.0 coming to address AI issues
 
 [](https://opensource.org/licenses/MIT)
 [](https://github.com/Codemaster-AR/aurora)
