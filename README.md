@@ -1,15 +1,15 @@
 
-# 🧬 Aurora (aurora-bioscience)
+# 🧬 Aurora (aurora-biospace)
 
 Aurora is a specialized toolset designed for bioscience applications search using the NASA OSDR API. v6.0.0 coming to address AI issues
 
 [](https://opensource.org/licenses/MIT)
-[](https://github.com/Codemaster-AR/aurora)
+[](https://github.com/Codemaster-AR/aurora-biospace)
 
 ## 🔗 Repository Links
 
-  * **Tap Repository:** [Codemaster-AR/homebrew-aurora](https://github.com/Codemaster-AR/homebrew-aurora)
-  * **Issues:** [Report a bug](https://www.google.com/search?q=https://github.com/Codemaster-AR/aurora/issues)
+  * **Tap Repository:** [Codemaster-AR/homebrew-aurora-biospace](https://github.com/Codemaster-AR/homebrew-aurora)
+  * **Issues:** [Report a bug](https://www.google.com/search?q=https://github.com/Codemaster-AR/aurora-biospace/issues)
 
 -----
 
