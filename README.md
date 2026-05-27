@@ -22,6 +22,9 @@ Aurora can be installed on **macOS**, **Linux**, and **WSL2 (Windows 11)** using
 Run the following commands in your terminal:
 
 ```bash
+# Update Homebrew connections
+brew update
+
 # Add the custom tap to Homebrew
 brew tap codemaster-ar/aurora
 
