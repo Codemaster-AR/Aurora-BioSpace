@@ -1,7 +1,7 @@
 
 # 🧬 Aurora (aurora-biospace)
 
-Aurora is a specialized toolset designed for bioscience applications search using the NASA OSDR API. Uses Google Auth to get Gemini-powered results with Google search grounding
+Aurora is a specialized toolset designed for bioscience applications search using the NASA OSDR API. Uses Google Auth to get Gemini-powered results with Google search grounding.
 
 [](https://opensource.org/licenses/MIT)
 [](https://github.com/Codemaster-AR/aurora-biospace)
