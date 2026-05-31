@@ -1,1 +1,518 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Aurora Biospace</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for premium visual depth -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            900: '#030712',
+                            950: '#020617',
+                        },
+                        aurora: {
+                            glow: '#00f2fe',
+                            teal: '#09d3ac',
+                            blue: '#4facfe',
+                            deep: '#0a0f24',
+                            card: '#111827'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        .aurora-bg {
+            background: radial-gradient(circle at 10% 20%, rgba(9, 211, 172, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.05) 0%, transparent 40%),
+                        #030712;
+        }
+        
+        /* Smooth scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="aurora-bg text-gray-300 font-sans min-h-screen selection:bg-aurora-teal/30 selection:text-white">
 
+    <!-- TOP HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-50 w-full border-b border-gray-800/80 bg-space-950/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- HOME BUTTON: Points directly to the specified project home page -->
+            <a href="https://quantal-labs.com/projects/aurora-biospace/" 
+               class="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-aurora-teal/50 text-xs sm:text-sm font-medium text-gray-200 transition-all duration-300 group shadow-lg shadow-black/40">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5 text-aurora-teal group-hover:-translate-x-1 transition-transform"></i>
+                <span>Aurora Biospace home</span>
+            </a>
+
+            <!-- Logo / Brand Identifier -->
+            <div class="flex items-center gap-3">
+                <div class="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-tr from-aurora-blue to-aurora-teal p-[1px]">
+                    <div class="w-full h-full bg-space-950 rounded-lg flex items-center justify-center">
+                        <i data-lucide="orbit" class="w-4 h-4 text-aurora-teal"></i>
+                    </div>
+                </div>
+                <span class="font-semibold text-white tracking-wider text-sm hidden sm:inline-block">AURORA BIOSPACE</span>
+            </div>
+
+            <!-- Meta Information Badge -->
+            <div class="hidden md:flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-aurora-teal/10 border border-aurora-teal/30 text-aurora-teal">
+                    Effective: May 31, 2026
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENT HERO BLOCK -->
+    <section class="relative overflow-hidden border-b border-gray-900 py-12 bg-gradient-to-b from-space-950 to-space-900">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(9,211,172,0.03),transparent_60%)]"></div>
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <span class="text-xs uppercase tracking-widest font-semibold text-aurora-teal bg-aurora-teal/5 px-3 py-1.5 rounded-full border border-aurora-teal/10">Legal Framework</span>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 tracking-tight">
+                Privacy Policy
+            </h1>
+            <p class="text-gray-400 mt-3 text-base sm:text-lg max-w-2xl mx-auto">
+                Comprehensive rules outlining Google Authentication, Gemini AI pipelines, search grounding mechanics, and open biological research telemetry.
+            </p>
+        </div>
+    </section>
+
+    <!-- MAIN BODY SECTION -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <!-- SIDEBAR INDEX (Sticky Desk, Hidden Mobile) -->
+            <aside class="hidden lg:block lg:col-span-1">
+                <div class="sticky top-24 space-y-6">
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Policy Index</h3>
+                        <nav class="space-y-1 text-xs">
+                            <a href="#introduction" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal active-nav-link">1. Introduction</a>
+                            <a href="#about" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">2. About Aurora Biospace</a>
+                            <a href="#info-collected" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">3. Information Collected</a>
+                            <a href="#use-info" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">4. Use of Information</a>
+                            <a href="#ai-services" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">5. Artificial Intelligence</a>
+                            <a href="#third-party" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">6. Third-Party Resources</a>
+                            <a href="#data-sharing" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">7. Data Sharing</a>
+                            <a href="#data-security" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">8. Data Security</a>
+                            <a href="#data-retention" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">9. Data Retention</a>
+                            <a href="#external-links" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">10. External Links</a>
+                            <a href="#children-privacy" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">11. Children's Privacy</a>
+                            <a href="#changes-policy" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">12. Policy Changes</a>
+                            <a href="#contact" class="block px-3 py-1.5 rounded-lg hover:bg-gray-800/50 hover:text-white transition-all text-gray-400 border-l-2 border-transparent hover:border-aurora-teal">13. Contact channels</a>
+                        </nav>
+                    </div>
+
+                    <!-- Quick search box inside sidebar -->
+                    <div class="p-4 rounded-xl bg-gray-900/60 border border-gray-800">
+                        <div class="relative">
+                            <i data-lucide="search" class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="policySearch" placeholder="Filter terms..." 
+                                   class="w-full bg-space-950 border border-gray-800 rounded-lg py-1.5 pl-9 pr-3 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-aurora-teal focus:border-aurora-teal">
+                        </div>
+                        <p class="text-[10px] text-gray-500 mt-2">Instantly search the entire privacy policy content below.</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- DOCUMENT CONTENT -->
+            <article class="col-span-1 lg:col-span-3 space-y-12 bg-gray-900/20 p-4 sm:p-8 rounded-2xl border border-gray-900">
+                
+                <!-- 1. Introduction -->
+                <section id="introduction" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">1</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Introduction</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace respects user privacy and is committed to protecting information handled through the application.
+                        </p>
+                        <p>
+                            This Privacy Policy explains how Aurora Biospace may collect, use, and process information when users access or use the Aurora Biospace platform.
+                        </p>
+                        <p class="border-l-2 border-aurora-teal pl-4 text-gray-400 italic">
+                            By using Aurora Biospace, users acknowledge and agree to the practices described in this Privacy Policy.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 2. About Aurora Biospace -->
+                <section id="about" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">2</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">About Aurora Biospace</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace is a scientific research and analysis platform that provides access to publicly available space biology and related research resources.
+                        </p>
+                        <p>The platform may provide:</p>
+                        <ul class="list-disc pl-6 space-y-2 text-gray-400">
+                            <li>Access to publicly available NASA-related and GeneLab-related scientific resources</li>
+                            <li>Retrieval and exploration of publicly accessible OSDR (Open Science Data Repository) and GeneLab data</li>
+                            <li>AI-assisted analysis and informational outputs using Google Gemini AI</li>
+                            <li>Search grounding and dynamic information retrieval technologies</li>
+                        </ul>
+                        <div class="p-3 bg-space-950 rounded-lg border border-gray-800 text-xs text-gray-400">
+                            <strong>Note:</strong> Aurora Biospace is an independent application and is not represented as an official NASA service or platform.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Information Collected -->
+                <section id="info-collected" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">3</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Information Collected</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <h4 class="text-base font-semibold text-white">Google Authentication Information</h4>
+                        <p>
+                            Aurora Biospace currently uses Google authentication for user sign-in. When users sign in using Google, Aurora Biospace may receive limited account information made available through Google's authentication systems, which may include:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-1 text-gray-400">
+                            <li>Name</li>
+                            <li>Email address</li>
+                            <li>Basic profile information</li>
+                        </ul>
+                        <p>
+                            Aurora Biospace currently uses this information primarily for authentication and account access purposes.
+                        </p>
+
+                        <h4 class="text-base font-semibold text-white mt-6">Usage and Technical Information</h4>
+                        <p>
+                            Aurora Biospace may automatically collect limited technical and usage-related information necessary for platform operation, security, and performance. This may include:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-1 text-gray-400">
+                            <li>Device and browser configurations</li>
+                            <li>Log files and diagnostic telemetry</li>
+                            <li>General usage activity records within the application</li>
+                            <li>Authentication-related session information</li>
+                        </ul>
+
+                        <h4 class="text-base font-semibold text-white mt-6">Research and Search Activity</h4>
+                        <p>
+                            Aurora Biospace may process user searches, viewed resources, and analysis requests in order to provide platform functionality. 
+                        </p>
+                        <p class="text-yellow-500/90 font-medium">
+                            Users should avoid submitting sensitive, confidential, or regulated personal information through the platform.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 4. Use of Information -->
+                <section id="use-info" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">4</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Use of Information</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>Aurora Biospace may use collected information to:</p>
+                        <ul class="list-disc pl-6 space-y-2 text-gray-400">
+                            <li>Provide, run, and maintain core platform functionality</li>
+                            <li>Authenticate users securely through Google sign-in</li>
+                            <li>Retrieve, map, and display astronomical and biological resources</li>
+                            <li>Generate AI-assisted analysis and educational, informational outputs</li>
+                            <li>Improve application functionality, overall stability, and operational security</li>
+                            <li>Detect, prevent, and mitigate misuse, abuse, or unauthorized activity</li>
+                        </ul>
+                        <p class="text-xs text-gray-400 bg-space-950 p-3 rounded-lg border border-gray-800">
+                            <strong>Disclaimer:</strong> Aurora Biospace does not represent that AI-generated outputs are guaranteed to be accurate, complete, or suitable for direct professional reliance.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 5. Artificial Intelligence Services -->
+                <section id="ai-services" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">5</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Artificial Intelligence Services</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace may use Google Gemini AI and Google Search grounding technologies to generate analysis and informational outputs.
+                        </p>
+                        <p>Users explicitly acknowledge that:</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                            <div class="p-4 rounded-xl bg-space-950 border border-gray-800/80">
+                                <div class="text-xs text-aurora-teal font-semibold uppercase mb-1">Algorithmic Risk</div>
+                                <p class="text-xs text-gray-400">AI-generated responses are subject to technical limitations and may contain inaccuracies or errors.</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-space-950 border border-gray-800/80">
+                                <div class="text-xs text-aurora-teal font-semibold uppercase mb-1">Informational Scope</div>
+                                <p class="text-xs text-gray-400">AI-generated outputs are educational and analytical in nature, not absolute medical or biological truths.</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-space-950 border border-gray-800/80">
+                                <div class="text-xs text-aurora-teal font-semibold uppercase mb-1">User Verification</div>
+                                <p class="text-xs text-gray-400">Users are solely responsible for independently evaluating and verifying scientific conclusions.</p>
+                            </div>
+                        </div>
+                        <p>
+                            User queries and related processing parameters may be handled through integrated AI pipeline endpoints as required for application functionality.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 6. Third-Party Services and Resources -->
+                <section id="third-party" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">6</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Third-Party Services and Resources</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace may interact with third-party services and publicly available resources, including:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-1.5 text-gray-400">
+                            <li>Google authentication services</li>
+                            <li>Google Gemini AI services</li>
+                            <li>Google Search grounding technologies</li>
+                            <li>Public NASA-related open resources</li>
+                            <li>Public GeneLab and OSDR APIs and public biology files</li>
+                        </ul>
+                        <p>
+                            Use of these third-party services may also be subject to the respective providers' terms, privacy policies, and operational practices. Aurora Biospace does not control external third-party services or publicly available external resources.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 7. Data Sharing -->
+                <section id="data-sharing" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">7</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Data Sharing</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p class="font-semibold text-white">
+                            Aurora Biospace does not sell personal information.
+                        </p>
+                        <p>
+                            Information may be shared only where reasonably necessary for:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-1 text-gray-400 font-normal">
+                            <li>Authentication and basic platform operation</li>
+                            <li>AI and live search processing functionality</li>
+                            <li>Security audits, fraud prevention, or critical technical protection</li>
+                            <li>Compliance with applicable legal obligations or regulatory guidelines</li>
+                        </ul>
+                        <p>
+                            Aurora Biospace may rely on external third-party infrastructure or hosting service providers necessary to operate the platform reliably.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 8. Data Security -->
+                <section id="data-security" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">8</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Data Security</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace takes reasonable technical and organizational measures intended to protect user information and maintain platform security.
+                        </p>
+                        <p>
+                            However, no internet-based service or electronic storage system can be guaranteed to be completely secure. Users acknowledge that use of online platforms involves inherent security risks.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 9. Data Retention -->
+                <section id="data-retention" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">9</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Data Retention</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace may retain information for as long as reasonably necessary to operate, maintain, improve, or protect the platform and related services.
+                        </p>
+                        <p>
+                            Retention periods may vary depending on operational need, ongoing research project lifecycles, security integrity, or legal requirements.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 10. External Links and Resources -->
+                <section id="external-links" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">10</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">External Links and Resources</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace may provide access to external resources, scientific datasets, third-party APIs, and planetary science web addresses.
+                        </p>
+                        <p>
+                            Aurora Biospace is not responsible for the privacy practices, content, or operations of third-party websites or external services.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 11. Children's Privacy -->
+                <section id="children-privacy" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">11</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Children's Privacy</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace does not intentionally target or market specifically toward children. Our models and academic resources are developed for research institutions and mature operators.
+                        </p>
+                        <p>
+                            Users are responsible for ensuring their use of the platform complies with applicable laws and age requirements in their local jurisdiction.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 12. Changes to This Privacy Policy -->
+                <section id="changes-policy" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">12</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Changes to This Privacy Policy</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Aurora Biospace may update or modify this Privacy Policy from time to time to match changing regulatory and platform parameters.
+                        </p>
+                        <p>
+                            Continued use of the platform following updates constitutes complete acceptance of the revised Privacy Policy.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 13. Contact -->
+                <section id="contact" class="scroll-mt-24 policy-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-aurora-teal/10 text-aurora-teal border border-aurora-teal/20 text-xs font-bold">13</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Contact & Inquiries</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Questions or clarifications regarding this Privacy Policy may be directed through Aurora Biospace contact channels as provided within the application:
+                        </p>
+                        <div class="p-5 rounded-xl bg-gray-900 border border-gray-800 space-y-3">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="mail" class="w-5 h-5 text-aurora-teal"></i>
+                                <span class="text-gray-200 font-mono text-sm">support@quantal-labs.com</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-aurora-blue"></i>
+                                <span class="text-sm">Quantal Labs, Project Aurora</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Final Acknowledgment -->
+                <div class="border-t border-gray-800/80 pt-6 mt-10 text-center">
+                    <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold">
+                        By using Aurora Biospace, you acknowledge that you have read and understood this Privacy Policy.
+                    </p>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-20 border-t border-gray-900 bg-space-950 py-12 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="text-xs text-gray-500">
+                &copy; 2026 Aurora Biospace. Built by <a href="https://quantal-labs.com" class="hover:text-aurora-teal underline transition-colors">Quantal Labs</a>. All rights reserved.
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://quantal-labs.com/projects/aurora-biospace/" class="text-xs text-gray-400 hover:text-white transition-colors">Project Hub</a>
+                <span class="text-gray-700">|</span>
+                <span class="text-xs text-gray-500">Compliance Code: AUR-PRV-2026-v2</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCROLL TO TOP BUTTON -->
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+            class="fixed bottom-6 right-6 p-3 rounded-full bg-gray-900 border border-gray-800 hover:border-aurora-teal hover:bg-gray-800 text-gray-300 hover:text-white shadow-xl transition-all duration-300 group z-50">
+        <i data-lucide="chevron-up" class="w-5 h-5 group-hover:-translate-y-1 transition-transform"></i>
+    </button>
+
+    <!-- INTERACTIVE JAVASCRIPT FOR SEARCH FILTER & INTERACTION -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Search Filter Logic for Privacy Policy Document
+        const searchInput = document.getElementById('policySearch');
+        const sections = document.querySelectorAll('.policy-section');
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            
+            sections.forEach(section => {
+                const text = section.innerText.toLowerCase();
+                if (text.includes(term)) {
+                    section.classList.remove('opacity-25');
+                    section.classList.add('opacity-100');
+                } else {
+                    section.classList.add('opacity-25');
+                    section.classList.remove('opacity-100');
+                }
+            });
+        });
+
+        // Dynamic Active Highlight for sidebar menu items depending on scroll position
+        window.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            const navLinks = document.querySelectorAll('aside nav a');
+            navLinks.forEach(link => {
+                link.classList.remove('text-aurora-teal', 'border-aurora-teal', 'bg-gray-800/50');
+                link.classList.add('text-gray-400', 'border-transparent');
+                
+                // Normalizing URL string matching
+                const targetId = link.getAttribute('href');
+                if (targetId === `#${current}`) {
+                    link.classList.add('text-aurora-teal', 'border-aurora-teal', 'bg-gray-800/50');
+                    link.classList.remove('text-gray-400', 'border-transparent');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
