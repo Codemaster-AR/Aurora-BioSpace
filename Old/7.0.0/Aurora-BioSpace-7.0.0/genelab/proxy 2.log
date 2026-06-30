@@ -1,0 +1,127 @@
+Proxy server listening on port 3001
+Proxy error: TypeError: fetch is not a function
+    at /Users/Anay_Rustogi/genelab/proxy.js:35:32
+    at Layer.handleRequest (/Users/Anay_Rustogi/genelab/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/Anay_Rustogi/genelab/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/Anay_Rustogi/genelab/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/Anay_Rustogi/genelab/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/Anay_Rustogi/genelab/node_modules/router/lib/layer.js:152:17)
+    at /Users/Anay_Rustogi/genelab/node_modules/router/index.js:295:15
+    at processParams (/Users/Anay_Rustogi/genelab/node_modules/router/index.js:582:12)
+    at next (/Users/Anay_Rustogi/genelab/node_modules/router/index.js:291:5)
+    at jsonParser (/Users/Anay_Rustogi/genelab/node_modules/body-parser/lib/types/json.js:100:7)
+Proxy server listening on port 3001
+Proxy error: TypeError: fetch is not a function
+    at /Users/Anay_Rustogi/genelab/proxy.js:35:32
+    at Layer.handleRequest (/Users/Anay_Rustogi/genelab/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/Anay_Rustogi/genelab/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/Anay_Rustogi/genelab/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/Anay_Rustogi/genelab/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/Anay_Rustogi/genelab/node_modules/router/lib/layer.js:152:17)
+    at /Users/Anay_Rustogi/genelab/node_modules/router/index.js:295:15
+    at processParams (/Users/Anay_Rustogi/genelab/node_modules/router/index.js:582:12)
+    at next (/Users/Anay_Rustogi/genelab/node_modules/router/index.js:291:5)
+    at jsonParser (/Users/Anay_Rustogi/genelab/node_modules/body-parser/lib/types/json.js:100:7)
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+Proxy server listening on port 3001
+fetchImport type: function
+fetchImport: <ref *1> [Function: fetch] {
+  isRedirect: [Function (anonymous)],
+  Promise: [Function: Promise],
+  default: [Circular *1],
+  Headers: [class Headers],
+  Request: [class Request],
+  Response: [class Response],
+  FetchError: [Function: FetchError],
+  AbortError: [Function: AbortError]
+}
+Proxy server listening on port 3001
+Proxy server listening on port 3001

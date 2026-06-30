@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantal Labs - Ecosystem Portal</title>
+    <!-- Tailwind CSS for modern design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            dark: '#030712',
+                            blue: '#3b82f6',
+                            teal: '#14b8a6',
+                            purple: '#a855f7',
+                            glow: '#06b6d4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+            overflow: hidden;
+        }
+        .font-tech {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Scanline Overlay Effect */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 212, 255, 0.04) 50%,
+                rgba(0, 212, 255, 0.04)
+            );
+            background-size: 100% 4px;
+        }
+
+        /* Drift In & Spring Keyframes */
+        @keyframes driftDown {
+            0% {
+                transform: translateY(-200px) scale(0.5);
+                opacity: 0;
+                filter: blur(20px) brightness(3);
+            }
+            60% {
+                transform: translateY(20px) scale(1.05);
+                opacity: 1;
+                filter: blur(0px) brightness(1.5);
+            }
+            80% {
+                transform: translateY(-10px) scale(0.98);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                filter: blur(0px) brightness(1);
+            }
+        }
+
+        /* Text Shimmer Effect */
+        @keyframes textShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Pulse Glowing Aura */
+        @keyframes glowPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(20, 184, 166, 0.15), 0 0 40px rgba(168, 85, 247, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(20, 184, 166, 0.4), 0 0 80px rgba(168, 85, 247, 0.3), 0 0 120px rgba(59, 130, 246, 0.2);
+            }
+        }
+
+        /* Radial expansion flash */
+        @keyframes flashOut {
+            0% {
+                transform: scale(0.1);
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+                filter: brightness(2);
+            }
+            100% {
+                transform: scale(3.5);
+                opacity: 0;
+                filter: blur(30px);
+            }
+        }
+
+        /* Utility Classes for Triggering Animations */
+        .animate-drift-down {
+            animation: driftDown 1.6s cubic-bezier(0.25, 1, 0.50, 1) forwards;
+        }
+        
+        .glow-pulse {
+            animation: glowPulse 4s infinite alternate ease-in-out;
+        }
+
+        .flash-element {
+            animation: flashOut 2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #14b8a6, #a855f7, #3b82f6, #14b8a6);
+            background-size: 300% 300%;
+            animation: textShimmer 4s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Ambient Grid */
+        .tech-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex items-center justify-center select-none overflow-hidden text-slate-100">
+
+    <!-- Ambient tech backgrounds -->
+    <div class="absolute inset-0 tech-grid pointer-events-none z-0"></div>
+    <div class="absolute inset-0 scanlines pointer-events-none z-0"></div>
+    <div class="absolute inset-0 bg-gradient-to-tr from-black via-cyber-dark to-slate-950 z-0"></div>
+    
+    <!-- Deep Space/Aurora Particle Canvas -->
+    <canvas id="particleCanvas" class="absolute inset-0 w-full h-full opacity-60 pointer-events-auto z-10"></canvas>
+
+    <!-- Interactive Flare Ring behind the logo -->
+    <div id="radialGlow" class="absolute pointer-events-none z-10 transition-all duration-1000 opacity-0 w-[500px] h-[500px] rounded-full bg-gradient-to-r from-cyber-teal/15 via-cyber-purple/15 to-cyber-blue/15 filter blur-[80px]"></div>
+
+    <!-- MAIN HERO CONTENT CONTAINER -->
+    <div class="relative flex flex-col items-center justify-center text-center px-4 max-w-2xl w-full z-20">
+        
+        <!-- The Volumetric Sound & Shockwave Trigger Overlay -->
+        <div id="shockwave" class="absolute hidden top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full border border-cyber-teal bg-transparent flash-element pointer-events-none"></div>
+
+        <!-- LOGO & BRAND SECTION -->
+        <div id="brandBox" class="flex flex-col items-center justify-center opacity-0 scale-95 transition-all duration-1000 ease-out">
+            
+            <!-- Elegant container with ambient glowing border -->
+            <div class="relative group">
+                <!-- Glowing backdrop ring -->
+                <div class="absolute -inset-1.5 rounded-full bg-gradient-to-r from-cyber-teal via-cyber-purple to-cyber-blue opacity-50 blur-md group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                
+                <!-- Main Image wrapper -->
+                <div class="relative w-36 h-36 md:w-44 md:h-44 rounded-full bg-slate-950 p-4 border border-slate-800/80 flex items-center justify-center glow-pulse overflow-hidden">
+                    <!-- Glass glare overlay -->
+                    <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
+                    
+                    <!-- Quantal Labs Logo -->
+                    <img id="quantalLogo" 
+                         src="https://raw.githubusercontent.com/Codemaster-AR/quantal/main/Logos/Quantal.png" 
+                         alt="Quantal Labs" 
+                         class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(20,184,166,0.6)] cursor-pointer transition-transform duration-500 hover:scale-105"
+                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80';">
+                </div>
+            </div>
+
+            <!-- Header and drift animation response text -->
+            <div id="subtext" class="mt-8 overflow-hidden">
+                <p class="font-tech text-xs tracking-[0.4em] text-cyber-teal uppercase opacity-0 translate-y-4 transition-all duration-700 ease-out">
+                    Aurora BioSpace
+                </p>
+                <h1 class="font-tech text-3xl md:text-5xl font-extrabold mt-2 tracking-wide font-tech opacity-0 translate-y-6 transition-all duration-1000 ease-out delay-100">
+                    CREATED BY <span class="shimmer-text">QUANTAL LABS</span>
+                </h1>
+            </div>
+        </div>
+
+        <!-- PROGRESS & STATS LOADER (Tuning into the environment) -->
+        <div id="loaderContainer" class="mt-12 w-72 md:w-96 flex flex-col items-center opacity-0 transition-all duration-700 delay-500">
+            <div class="flex justify-between w-full text-[10px] font-tech text-slate-400 mb-1.5 uppercase tracking-widest px-1">
+                <span id="loadingStatus">Validating subdomains...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <!-- Progress bar Track -->
+            <div class="w-full h-1.5 bg-slate-900/90 rounded-full overflow-hidden border border-slate-800/60 p-[1px] relative">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-cyber-teal via-cyber-blue to-cyber-purple rounded-full w-0 transition-all duration-150 ease-out"></div>
+            </div>
+            <!-- Interactive hint -->
+            <div class="mt-4 flex items-center justify-center space-x-2 text-slate-500 hover:text-cyber-teal transition-colors text-xs cursor-pointer font-tech" onclick="triggerCyberSound()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+                <span>Click for Ambient Audio</span>
+            </div>
+        </div>
+
+        <!-- POST-LOAD INTERACTION MENU (Displays once loading complete) -->
+        <div id="actionMenu" class="hidden flex flex-col items-center mt-10 space-y-6 w-full max-w-md">
+            <button id="launchBtn" onclick="launchApp()" class="w-full relative group overflow-hidden rounded-xl p-[1px] transition-transform active:scale-95 duration-200">
+                <div class="absolute inset-0 bg-gradient-to-r from-cyber-teal via-cyber-blue to-cyber-purple rounded-xl opacity-80 group-hover:opacity-100 blur transition-opacity duration-300"></div>
+                <div class="relative bg-slate-950 rounded-xl py-4 px-8 text-sm font-semibold tracking-widest text-white uppercase font-tech transition-all group-hover:bg-opacity-90 flex items-center justify-center space-x-3">
+                    <span>Launch Quantal Suite</span>
+                    <svg class="w-4 h-4 text-cyber-teal animate-bounce-horizontal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Shortcuts into sub-modules -->
+            <div class="grid grid-cols-3 gap-2.5 w-full text-[11px] font-tech text-slate-400">
+                <a href="#minios" onclick="goToModule('MiniOS')" class="py-2.5 rounded-lg border border-slate-800/80 bg-slate-900/30 hover:bg-cyber-teal/5 hover:border-cyber-teal/30 hover:text-cyber-teal transition-all text-center">
+                    MINI-OS
+                </a>
+                <a href="#agri-os" onclick="goToModule('Agri-OS')" class="py-2.5 rounded-lg border border-slate-800/80 bg-slate-900/30 hover:bg-cyber-purple/5 hover:border-cyber-purple/30 hover:text-cyber-purple transition-all text-center">
+                    AGRI-OS
+                </a>
+                <a href="#aurora" onclick="goToModule('Aurora')" class="py-2.5 rounded-lg border border-slate-800/80 bg-slate-900/30 hover:bg-cyber-blue/5 hover:border-cyber-blue/30 hover:text-cyber-blue transition-all text-center">
+                    AURORA
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Minimal Toast notification wrapper inside Canvas -->
+    <div id="toastNotification" class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-950/90 border border-slate-800 backdrop-blur-md py-2.5 px-5 rounded-full flex items-center space-x-2.5 text-xs text-slate-300 shadow-2xl opacity-0 translate-y-4 pointer-events-none transition-all duration-500 z-30">
+        <span class="w-2 h-2 rounded-full bg-cyber-teal animate-ping"></span>
+        <span id="toastMsg">Initializing Engine...</span>
+    </div>
+
+    <!-- SOUND SYNTHESIZER MODULE (Pure Web Audio - No file downloads) -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSynthesizedSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                if (type === 'shockwave') {
+                    // Deep futuristic sub drop + synth sweep
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    const filter = audioCtx.createBiquadFilter();
+
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(40, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.15);
+                    osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 1.8);
+
+                    filter.type = 'lowpass';
+                    filter.Q.setValueAtTime(8, audioCtx.currentTime);
+                    filter.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+                    filter.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 1.5);
+
+                    gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0);
+
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 2.1);
+                } else if (type === 'tick') {
+                    // Quick digital pulse tick
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.06);
+                } else if (type === 'access') {
+                    // Sci-fi chime
+                    const osc1 = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc1.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+
+                    osc2.type = 'triangle';
+                    osc2.frequency.setValueAtTime(783.99, audioCtx.currentTime); // G5
+                    osc2.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.1); // C6
+
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+
+                    osc1.start();
+                    osc2.start();
+                    osc1.stop(audioCtx.currentTime + 0.7);
+                    osc2.stop(audioCtx.currentTime + 0.7);
+                }
+            } catch (e) {
+                console.warn("Audio Context blocked or not supported on this device.", e);
+            }
+        }
+
+        function triggerCyberSound() {
+            playSynthesizedSound('access');
+            showToast("Synthesizer Active - Ready.");
+        }
+    </script>
+
+    <!-- INTERACTIVE SPACE PARTICLE ENGINE -->
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const particles = [];
+        const mouse = { x: null, y: null, radius: 160 };
+
+        // Handle Resizing gracefully
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        // Mouse & Touch movement tracking
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 1.8 + 0.5;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 15;
+                // Cyber aesthetic colors matching Quantal Studio branding
+                const colors = ['#14b8a6', '#3b82f6', '#a855f7', '#64748b'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.alpha = Math.random() * 0.7 + 0.3;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = (Math.random() - 0.5) * 0.4;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                
+                // Add minor glow matching standard dark interface aesthetics
+                if (this.size > 1.4) {
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = this.color;
+                }
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                // Free floating movement
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Bounce off viewport boundaries
+                if (this.x < 0 || this.x > width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > height) this.speedY = -this.speedY;
+
+                // Interactive repulsion/attraction to cursor & touches
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < mouse.radius) {
+                        let forceDirectionX = dx / distance;
+                        let forceDirectionY = dy / distance;
+                        
+                        // Gravitational force effect based on cursor proximity
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        let directionX = forceDirectionX * force * this.density * 0.4;
+                        let directionY = forceDirectionY * force * this.density * 0.4;
+                        
+                        this.x -= directionX;
+                        this.y -= directionY;
+                    }
+                }
+            }
+        }
+
+        function initParticles() {
+            particles.length = 0;
+            const densityValue = Math.min((width * height) / 9000, 150);
+            for (let i = 0; i < densityValue; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Generate ambient connection lines for space/grid visual
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 110) {
+                        ctx.save();
+                        ctx.strokeStyle = `rgba(20, 184, 166, ${0.12 - (dist / 110) * 0.12})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        initParticles();
+        animate();
+    </script>
+
+    <!-- TIMED INTRO ANIMATION CONTROL SEQUENCE -->
+    <script>
+        const brandBox = document.getElementById('brandBox');
+        const radialGlow = document.getElementById('radialGlow');
+        const subtext = document.getElementById('subtext');
+        const loaderContainer = document.getElementById('loaderContainer');
+        const actionMenu = document.getElementById('actionMenu');
+        const toast = document.getElementById('toastNotification');
+        const toastMsg = document.getElementById('toastMsg');
+        const shockwave = document.getElementById('shockwave');
+
+        const loadingStatuses = [
+            "Synchronizing Core...",
+            "Mapping Gateway routes...",
+            "Decrypting Node keys...",
+            "Activating Aurora Space-Link...",
+            "Deploying Agri-OS matrix...",
+            "Gateway handshake secured."
+        ];
+
+        // Trigger on DOM ready
+        window.onload = function() {
+            // Stage 1: Absolute silence -> Logo Drifts & Shockwave trigger
+            setTimeout(() => {
+                const imgContainer = brandBox.querySelector('.group');
+                brandBox.classList.remove('opacity-0', 'scale-95');
+                imgContainer.classList.add('animate-drift-down');
+                radialGlow.classList.remove('opacity-0');
+                
+                // Shockwave and sound triggers
+                setTimeout(() => {
+                    shockwave.classList.remove('hidden');
+                    playSynthesizedSound('shockwave');
+                }, 400);
+
+            }, 800);
+
+            // Stage 2: Reveal Title texts after Logo settles
+            setTimeout(() => {
+                const subtextParas = subtext.querySelectorAll('p, h1');
+                subtextParas[0].classList.remove('opacity-0', 'translate-y-4');
+                subtextParas[1].classList.remove('opacity-0', 'translate-y-6');
+                showToast("System Authorization complete.");
+            }, 2100);
+
+            // Stage 3: Reveal and trigger progress loading Sequence
+            setTimeout(() => {
+                loaderContainer.classList.remove('opacity-0');
+                startLoadingSequence();
+            }, 3200);
+        };
+
+        // Loading Progress Simulation
+        function startLoadingSequence() {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const loadingStatus = document.getElementById('loadingStatus');
+            
+            let percent = 0;
+            let statusIndex = 0;
+
+            const interval = setInterval(() => {
+                if (percent >= 100) {
+                    clearInterval(interval);
+                    completeIntroSequence();
+                    return;
+                }
+
+                // Random speed variance to make progress realistic
+                let increment = Math.floor(Math.random() * 8) + 2;
+                percent = Math.min(percent + increment, 100);
+                
+                progressBar.style.width = percent + '%';
+                progressPercent.innerText = percent + '%';
+
+                // Change diagnostic status text dynamically
+                if (percent > (100 / loadingStatuses.length) * (statusIndex + 1)) {
+                    statusIndex++;
+                    if (loadingStatuses[statusIndex]) {
+                        loadingStatus.innerText = loadingStatuses[statusIndex];
+                        playSynthesizedSound('tick');
+                    }
+                }
+            }, 180);
+        }
+
+        // Final transition: Loading wraps -> CTA buttons emerge
+        function completeIntroSequence() {
+            playSynthesizedSound('access');
+            showToast("All Quantal Networks: Online.");
+            
+            // Smoothly swap loader out and action items in
+            loaderContainer.classList.add('opacity-0');
+            setTimeout(() => {
+                loaderContainer.classList.add('hidden');
+                actionMenu.classList.remove('hidden');
+                
+                // Springy drop fade in for action items
+                setTimeout(() => {
+                    actionMenu.classList.add('opacity-100', 'translate-y-0');
+                }, 50);
+            }, 700);
+        }
+
+        // Custom clean notification system inside canvas UI
+        function showToast(msg) {
+            toastMsg.innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+            
+            // Automatically clear toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Button action handlers
+        function launchApp() {
+            playSynthesizedSound('access');
+            showToast("Redirecting to Unified SSO Portal...");
+            
+            // Redirect simulation (can link to your SSO portal or app dashboard)
+            setTimeout(() => {
+                window.location.href = "https://quantal-labs.com";
+            }, 1200);
+        }
+
+        function goToModule(moduleName) {
+            playSynthesizedSound('tick');
+            showToast(`Loading branch: ${moduleName}...`);
+        }
+    </script>
+        <script>
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 6500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "integrated-genelab",
+  "version": "1.0.0",
+  "description": "An Electron app for the Aurora Integrated Dashboard.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "Anay_Rustogi",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}
