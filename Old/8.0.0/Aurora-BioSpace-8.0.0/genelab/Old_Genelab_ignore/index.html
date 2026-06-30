@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Aurora Science Data Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'nasa-blue': '#1F3F66',
+                        'nasa-orange': '#D45C3E',
+                        'nasa-light': '#F8F9FA',
+                        'nasa-teal': '#28B4AF',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base styles for a clean, modern look */
+        body {
+            background-color: #f4f7f9;
+        }
+
+        /* Custom styles for the tabs */
+        .tab-link {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-link.active {
+            border-bottom: 2px solid var(--tw-colors-nasa-blue);
+            color: var(--tw-colors-nasa-blue);
+            font-weight: 600;
+        }
+
+        /* Style for the slider */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--tw-colors-nasa-blue);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Loader Animation */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--tw-colors-nasa-teal);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Publication list items */
+        .publication-item {
+            transition: background-color 0.1s ease-in-out;
+            cursor: pointer;
+        }
+        .publication-item:hover {
+            background-color: #eef1f4;
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl font-extrabold text-nasa-blue">Aurora</span>
+                    <div class="relative hidden lg:block">
+                        <input type="text" id="search-input" placeholder="Search publications, experiments, and insights..."
+                            class="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nasa-teal w-80 text-sm"
+                            oninput="filterPublications()">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="flex space-x-6">
+                    <div id="tab-dashboard" class="tab-link active" onclick="activateTab(this, 'dashboard')">Home</div>
+                    <div id="tab-publications" class="tab-link" onclick="activateTab(this, 'publications')">Results</div>
+                    <div id="tab-graph" class="tab-link" onclick="activateTab(this, 'graph')">More</div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex space-x-6">
+
+        <!-- Sidebar / Filters -->
+        <aside class="w-1/4 space-y-8 p-4 bg-white rounded-xl shadow-lg h-full sticky top-20">
+            <h2 class="text-xl font-bold text-nasa-blue">Publication Filters</h2>
+
+            <!-- Year Range Filter -->
+            <div class="space-y-3">
+                <label for="year-range" class="block text-sm font-medium text-gray-700 flex justify-between">
+                    <span>Year Range</span>
+                    <span id="year-count" class="text-xs bg-nasa-blue text-white px-2 py-0.5 rounded-full">2018 - 2025</span>
+                </label>
+                <input type="range" id="year-range" min="2018" max="2025" value="2025" step="1"
+                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg"
+                    oninput="updateYearFilter(this.value); filterPublications()">
+            </div>
+
+            <!-- Experiment Checkbox Filters -->
+            <div class="space-y-4">
+                <h3 class="text-base font-medium text-gray-700">Experiment Filters</h3>
+                <div id="experiment-filters" class="grid grid-cols-2 gap-y-2 text-sm">
+                    <!-- Checkboxes will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Insight Type Filter (Dropdown) -->
+            <div class="space-y-2">
+                <h3 class="text-base font-medium text-gray-700">Insight Type</h3>
+                <select id="insight-filter" onchange="filterPublications()"
+                    class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-nasa-teal">
+                    <option value="All">All Relevance</option>
+                    <option value="Relevance to Mission">Relevance to Mission</option>
+                    <option value="Scientific Discovery">Scientific Discovery</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard/Results Area -->
+        <div class="w-3/4 space-y-8">
+            <h1 id="main-content-title" class="text-3xl font-bold text-gray-900">Home Overview & Trending Insights</h1>
+            
+            <!-- Loading Indicator for the entire main area -->
+            <div id="dashboard-loading-indicator" class="flex flex-col items-center justify-center p-12 bg-white rounded-xl shadow-lg text-gray-500">
+                <div class="loader mb-3"></div>
+                <p>Initializing dashboard...</p>
+                <p class="text-xs mt-2">Attempting to fetch live data from the NASA Open Science Data Repository (OSDR).</p>
+            </div>
+
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="space-y-8 hidden">
+                
+                <!-- Simulated Data Banner -->
+                <div id="simulated-data-banner" class="hidden bg-nasa-orange/20 border-l-4 border-nasa-orange p-3 rounded-lg text-sm text-gray-800" role="alert">
+                    <p class="font-semibold flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-nasa-orange" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.333a.875.875 0 011.486 0l7.322 13.333A.875.875 0 0116.322 18H3.678a.875.875 0 01-.733-1.333L8.257 3.333zM9 8a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 019 8zm0 5a.75.75 0 100 1.5.75.75 0 000-1.5z" clip-rule="evenodd" />
+                        </svg>
+                        Simulated Data Active
+                    </p>
+                    <p class="mt-1 pl-7 text-xs">Could not fetch live data from the NASA API. Charts are displaying mock data.</p>
+                </div>
+                
+                <!-- Top Trends Card -->
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center justify-between">
+                        Top Trends in Bioscience
+                        <div class="text-sm font-normal text-gray-500 flex space-x-4">
+                            <span class="flex items-center"><span class="w-3 h-3 bg-nasa-orange rounded-full mr-2"></span>AI & Data Analytics</span>
+                            <span class="flex items-center"><span class="w-3 h-3 bg-nasa-blue rounded-full mr-2"></span>Multi-omic Biomarker Discovery</span>
+                        </div>
+                    </h2>
+                    <div id="trend-chart" class="w-full h-64">
+                        <svg id="trend-svg" class="w-full h-full"></svg>
+                    </div>
+                </div>
+
+                <!-- Insight Cards -->
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Key Knowledge Gaps -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg space-y-4">
+                        <h3 class="text-xl font-semibold flex items-center">Key Knowledge Gaps</h3>
+                        <div id="knowledge-gaps" class="space-y-3 text-sm">
+                            <p class="text-gray-500 italic">Loading gaps...</p>
+                        </div>
+                        <a href="#" class="text-nasa-teal font-medium hover:text-nasa-blue text-sm block mt-4">Explore All 27 Gaps →</a>
+                    </div>
+                    
+                    <!-- Actionable Insights -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg space-y-4">
+                        <h3 class="text-xl font-semibold flex items-center">Actionable Insights for Mission Planners</h3>
+                        <div id="actionable-insights" class="space-y-3 text-sm">
+                            <p class="text-gray-500 italic">Loading insights...</p>
+                        </div>
+                        <button class="bg-nasa-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-nasa-teal transition-colors shadow-md">View All 15 Insights</button>
+                    </div>
+                </div>
+
+                <!-- Bottom Row Charts -->
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Experiment Focus Area Distribution -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Focus Area Distribution</h3>
+                        <div id="focus-chart" class="w-full h-64 flex justify-center items-center">
+                            <svg id="focus-svg" class="w-full h-full"></svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Publications by Year Bar Chart -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Publications by Year</h3>
+                        <div id="publications-chart" class="w-full h-64">
+                            <svg id="publications-svg" class="w-full h-full"></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIAGNOSTIC PANEL (Always visible in dashboard view) -->
+                <div id="diagnostic-panel" class="bg-gray-100 p-4 rounded-xl shadow-inner border border-gray-300">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-nasa-blue" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h.01a1 1 0 100-2H10V9a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        API Connection Diagnostic Report
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-2">Results for live data request to: `https://visualization.osdr.nasa.gov/biodata/api/v2/datasets/`</p>
+                    <div id="diagnostic-results" class="bg-white p-3 rounded-lg text-sm font-mono text-gray-700 overflow-x-auto">
+                        Running diagnostic...
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Publications List View -->
+            <div id="publications-view" class="space-y-6 hidden">
+                <div id="filtered-publications-container" class="space-y-3">
+                    <p class="text-center text-gray-500 italic text-lg p-10">Use the filters on the left to find publications.</p>
+                    <!-- Publications list will be injected here -->
+                </div>
+            </div>
+
+            <!-- Graph View Placeholder -->
+            <div id="graph-view" class="space-y-6 hidden">
+                <div class="bg-white p-10 rounded-xl shadow-lg text-center text-gray-500 italic text-lg">
+                    <h3 class="text-2xl font-bold mb-3 text-nasa-blue">Knowledge Graph View</h3>
+                    <p>This section will feature an interactive visualization of connections between experiments, publications, and mission objectives.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Global Data and Constants ---
+        const OSDR_BASE_API = 'https://visualization.osdr.nasa.gov/biodata/api/v2';
+        let osdrGraphData = {};
+        let filteredPublications = [];
+        let isSimulatedData = false; 
+
+        // Sample data for fallback if API fails (similar to the data structure from OSDR)
+        const fallbackGraphData = {
+            publications: [
+                { id: 1, title: "Novel Methods in Space Radiation Dosage Measurement", year: 2023, facility: "ISS", experiment: "Radiation", relevance: "Relevance to Mission" },
+                { id: 2, title: "Long-term Effects of Microgravity on Bone Density in Rodents", year: 2020, facility: "ISS", experiment: "Microgravity", relevance: "Scientific Discovery" },
+                { id: 3, title: "Plant Adaption for Mars Regolith: A Genomics Study", year: 2025, facility: "House", experiment: "Nutrition", relevance: "Relevance to Mission" },
+                { id: 4, title: "Muscle Atrophy Biomarkers in Partial G Environment", year: 2024, facility: "ISS", experiment: "Muscle Atrophy", relevance: "Relevance to Mission" },
+                { id: 5, title: "AI-Driven Synthesis of Multi-Omic Datasets", year: 2023, facility: "ISS", experiment: "AI & Data Analytics", relevance: "Scientific Discovery" },
+                { id: 6, title: "Nutritional Countermeasure Optimization for Long-Duration Flight", year: 2022, facility: "House", experiment: "Nutrition", relevance: "Relevance to Mission" },
+                { id: 7, title: "Impact of Cosmic Rays on Circadian Rhythms", year: 2021, facility: "ISS", experiment: "Radiation", relevance: "Scientific Discovery" },
+                { id: 8, title: "Advanced Methods for Monitoring Cardiovascular Health in Space", year: 2021, facility: "ISS", experiment: "Bone Health", relevance: "Relevance to Mission" },
+                { id: 9, title: "Psychological Resilience in Isolation: A Simulation Study", year: 2022, facility: "House", experiment: "AI & Data Analytics", relevance: "Scientific Discovery" },
+                { id: 10, title: "Next-Generation Life Support System Design using Synthetic Biology", year: 2024, facility: "ISS", experiment: "Nutrition", relevance: "Relevance to Mission" },
+            ],
+            trends: [
+                { year: 2018, 'AI & Data Analytics': 1, 'Multi-omic Biomarker Discovery': 0 },
+                { year: 2019, 'AI & Data Analytics': 2, 'Multi-omic Biomarker Discovery': 1 },
+                { year: 2020, 'AI & Data Analytics': 3, 'Multi-omic Biomarker Discovery': 2 },
+                { year: 2021, 'AI & Data Analytics': 5, 'Multi-omic Biomarker Discovery': 3 },
+                { year: 2022, 'AI & Data Analytics': 7, 'Multi-omic Biomarker Discovery': 5 },
+                { year: 2023, 'AI & Data Analytics': 9, 'Multi-omic Biomarker Discovery': 7 },
+                { year: 2024, 'AI & Data Analytics': 10, 'Multi-omic Biomarker Discovery': 9 },
+                { year: 2025, 'AI & Data Analytics': 11, 'Multi-omic Biomarker Discovery': 10 },
+            ],
+            focus: [
+                { category: "Physiology & H'Factors", value: 40 },
+                { category: "Radiatiar Biology Biosystems & Ecology", value: 60 },
+            ],
+            gaps: [
+                { title: "Muscle Atrophy in Partial G", detail: "Daily 1g loading insufficient. Mechanism & optimal force unknown", priority: "High" },
+                { title: "Plant Adaption for Mars Regolith", detail: "Long-term nutrient uptake & genetic stability in simulants.", priority: "Medium" },
+            ],
+            insights: [
+                { title: "Lunar Dust Toxicity Protocol", detail: "Implement electrostatic filtering based on recent findings." },
+                { title: "60-min Daily Bone Loading", detail: "Confirmed effective on Mars transit exercise schedules." },
+            ]
+        };
+
+        const experimentNames = ["Microgravity", "Radiation", "ISS", "House", "Muscle Atrophy", "Bone Health", "Nutrition", "AI & Data Analytics"];
+
+        // --- D3 Charting Functions (omitted for brevity, they are unchanged) ---
+        function renderPublicationsChart() {
+            const containerId = '#publications-chart';
+            const svgId = '#publications-svg';
+            const data = osdrGraphData.publications
+                .reduce((acc, pub) => {
+                    const year = pub.year;
+                    acc[year] = (acc[year] || 0) + 1;
+                    return acc;
+                }, {});
+
+            const chartData = Object.keys(data).map(year => ({ year: +year, count: data[year] })).sort((a, b) => a.year - b.year);
+
+            d3.select(svgId).selectAll('*').remove();
+
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 },
+                width = document.querySelector(containerId).clientWidth - margin.left - margin.right,
+                height = document.querySelector(containerId).clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select(svgId)
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleBand()
+                .range([0, width])
+                .padding(0.2)
+                .domain(chartData.map(d => d.year));
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(chartData, d => d.count) || 1])
+                .range([height, 0]);
+
+            // Bars
+            svg.selectAll(".bar")
+                .data(chartData)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.year))
+                .attr("y", d => y(d.count))
+                .attr("width", x.bandwidth())
+                .attr("height", d => height - y(d.count))
+                .attr("fill", "var(--tw-colors-nasa-blue)")
+                .attr("rx", 3)
+                .on("mouseover", function() { d3.select(this).attr("fill", "var(--tw-colors-nasa-teal)"); })
+                .on("mouseout", function() { d3.select(this).attr("fill", "var(--tw-colors-nasa-blue)"); });
+
+            // X-axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickFormat(d3.format("d")))
+                .selectAll("text")
+                .style("font-size", "10px");
+
+            // Y-axis
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(5).tickSize(5))
+                .selectAll("text")
+                .style("font-size", "10px");
+        }
+        function renderFocusChart() {
+            const containerId = '#focus-chart';
+            const svgId = '#focus-svg';
+            const data = osdrGraphData.focus;
+
+            d3.select(svgId).selectAll('*').remove();
+
+            const width = document.querySelector(containerId).clientWidth;
+            const height = document.querySelector(containerId).clientHeight;
+            const radius = Math.min(width, height) / 2 - 10;
+            const color = d3.scaleOrdinal()
+                .domain(data.map(d => d.category))
+                .range(['var(--tw-colors-nasa-blue)', 'var(--tw-colors-nasa-orange)']);
+
+            const svg = d3.select(svgId)
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+            const pie = d3.pie()
+                .sort(null)
+                .value(d => d.value);
+
+            const path = d3.arc()
+                .outerRadius(radius * 0.8)
+                .innerRadius(radius * 0.5);
+
+            const arc = svg.selectAll(".arc")
+                .data(pie(data))
+                .enter().append("g")
+                .attr("class", "arc");
+
+            arc.append("path")
+                .attr("d", path)
+                .attr("fill", d => color(d.data.category))
+                .attr("stroke", "white")
+                .style("stroke-width", "2px")
+                .on("mouseover", function(event, d) {
+                    d3.select(this).transition().duration(200).attr("d", d3.arc().outerRadius(radius * 0.85).innerRadius(radius * 0.55));
+                })
+                .on("mouseout", function(event, d) {
+                    d3.select(this).transition().duration(200).attr("d", path);
+                });
+
+            // Add center text
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle")
+                .attr("class", "text-2xl font-bold text-gray-800")
+                .text(`${data.reduce((sum, d) => sum + d.value, 0)}%`)
+                .style("fill", "var(--tw-colors-nasa-blue)");
+        }
+        function renderTrendChart() {
+            const containerId = '#trend-chart';
+            const svgId = '#trend-svg';
+            const data = osdrGraphData.trends;
+
+            d3.select(svgId).selectAll('*').remove();
+
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 },
+                width = document.querySelector(containerId).clientWidth - margin.left - margin.right,
+                height = document.querySelector(containerId).clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select(svgId)
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const keys = ['AI & Data Analytics', 'Multi-omic Biomarker Discovery'];
+
+            const x = d3.scaleLinear()
+                .range([0, width])
+                .domain(d3.extent(data, d => d.year));
+
+            const y = d3.scaleLinear()
+                .range([height, 0])
+                .domain([0, 15]); // Max Y value
+
+            const color = d3.scaleOrdinal()
+                .domain(keys)
+                .range(['var(--tw-colors-nasa-orange)', 'var(--tw-colors-nasa-blue)']);
+
+            // X Axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickFormat(d3.format("d")).ticks(5).tickSizeOuter(0))
+                .selectAll("text")
+                .style("font-size", "10px");
+
+            // Y Axis
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
+                .selectAll("text")
+                .style("font-size", "10px");
+
+            const line = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.value))
+                .curve(d3.curveMonotoneX);
+
+            // Draw the lines
+            keys.forEach(key => {
+                const lineData = data.map(d => ({ year: d.year, value: d[key] }));
+                svg.append("path")
+                    .datum(lineData)
+                    .attr("fill", "none")
+                    .attr("stroke", color(key))
+                    .attr("stroke-width", 3)
+                    .attr("d", line);
+
+                // Add circles for data points
+                svg.selectAll(`.dot-${key.replace(/[^a-zA-Z0-9]/g, '')}`)
+                    .data(lineData)
+                    .enter().append("circle")
+                    .attr("class", `dot-${key.replace(/[^a-zA-Z0-9]/g, '')}`)
+                    .attr("cx", d => x(d.year))
+                    .attr("cy", d => y(d.value))
+                    .attr("r", 5)
+                    .attr("fill", color(key))
+                    .attr("stroke", "white")
+                    .attr("stroke-width", 2);
+            });
+        }
+        function renderGapAndInsightCards() {
+            const renderList = (id, items, priority) => {
+                const container = document.getElementById(id);
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const priorityTag = priority && item.priority === 'High' ?
+                        '<span class="text-xs bg-nasa-orange text-white px-2 py-0.5 rounded-full ml-2">High Priority</span>' : '';
+                    container.innerHTML += `
+                        <div class="border-l-4 ${item.priority === 'High' ? 'border-nasa-orange' : 'border-nasa-blue'} pl-3 py-1">
+                            <p class="font-semibold text-gray-900 flex items-center">${item.title} ${priorityTag}</p>
+                            <p class="text-gray-600 text-xs">${item.detail}</p>
+                        </div>
+                    `;
+                });
+            };
+
+            renderList('knowledge-gaps', osdrGraphData.gaps, true);
+            renderList('actionable-insights', osdrGraphData.insights, false);
+        }
+        function renderExperimentFilters() {
+            const container = document.getElementById('experiment-filters');
+            container.innerHTML = '';
+
+            const activeFilters = getActiveExperimentFilters();
+
+            experimentNames.forEach(name => {
+                const isChecked = activeFilters.includes(name) ? 'checked' : '';
+                container.innerHTML += `
+                    <div class="flex items-center">
+                        <input id="filter-${name.replace(/\s/g, '-')}" type="checkbox" value="${name}" ${isChecked}
+                            class="h-4 w-4 text-nasa-blue border-gray-300 rounded focus:ring-nasa-teal"
+                            onchange="filterPublications()">
+                        <label for="filter-${name.replace(/\s/g, '-')}" class="ml-2 text-gray-700">${name}</label>
+                    </div>
+                `;
+            });
+        }
+        function renderPublicationsList(publications) {
+            const container = document.getElementById('filtered-publications-container');
+            container.innerHTML = '';
+
+            if (publications.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 italic text-lg p-10">No publications match the current filters.</p>';
+                return;
+            }
+
+            publications.forEach(pub => {
+                container.innerHTML += `
+                    <div class="publication-item bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <p class="text-lg font-semibold text-nasa-blue">${pub.title}</p>
+                        <p class="text-sm text-gray-600 mb-2">Year: ${pub.year} | Experiment: ${pub.experiment} | Facility: ${pub.facility}</p>
+                        <span class="text-xs bg-nasa-teal text-white px-2 py-0.5 rounded-full">${pub.relevance}</span>
+                    </div>
+                `;
+            });
+        }
+        function getActiveExperimentFilters() {
+            const checkboxes = document.querySelectorAll('#experiment-filters input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+        function filterPublications() {
+            const maxYear = parseInt(document.getElementById('year-range').value);
+            const searchTerms = document.getElementById('search-input').value.toLowerCase();
+            const activeExperiments = getActiveExperimentFilters();
+            const relevanceFilter = document.getElementById('insight-filter').value;
+            
+            // Start with the full list from the loaded data
+            let tempPublications = osdrGraphData.publications || [];
+
+            filteredPublications = tempPublications.filter(pub => {
+                const matchesYear = pub.year <= maxYear;
+                const matchesSearch = pub.title.toLowerCase().includes(searchTerms) ||
+                                      pub.experiment.toLowerCase().includes(searchTerms);
+                const matchesExperiment = activeExperiments.length === 0 || activeExperiments.includes(pub.experiment) || activeExperiments.includes(pub.facility);
+                const matchesRelevance = relevanceFilter === 'All' || pub.relevance === relevanceFilter;
+
+                return matchesYear && matchesSearch && matchesExperiment && matchesRelevance;
+            });
+
+            // Only re-render the list if the publications view is active
+            if (!document.getElementById('publications-view').classList.contains('hidden')) {
+                renderPublicationsList(filteredPublications);
+            }
+        }
+        function updateYearFilter(value) {
+            document.getElementById('year-count').textContent = `2018 - ${value}`;
+        }
+        function activateTab(element, viewId) {
+            // Deactivate all tabs
+            document.querySelectorAll('.tab-link').forEach(tab => tab.classList.remove('active'));
+            // Hide all views
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('publications-view').classList.add('hidden');
+            document.getElementById('graph-view').classList.add('hidden');
+
+            // Activate clicked tab
+            element.classList.add('active');
+            
+            // Show corresponding view
+            const viewElement = document.getElementById(`${viewId}-view`);
+            viewElement.classList.remove('hidden');
+
+            // Update main title
+            document.getElementById('main-content-title').textContent = {
+                'dashboard': 'Home Overview & Trending Insights',
+                'publications': 'Filtered Publication Results',
+                'graph': 'Knowledge Graph View'
+            }[viewId];
+
+            // Re-apply simulated data warning if needed
+            if (viewId === 'dashboard') {
+                if (isSimulatedData) {
+                    document.getElementById('simulated-data-banner').classList.remove('hidden');
+                }
+                renderAllCharts(); // Re-render charts
+            } else {
+                document.getElementById('simulated-data-banner').classList.add('hidden');
+            }
+            
+            // Re-render publications list if we switch to the publications view
+            if (viewId === 'publications') {
+                filterPublications();
+            }
+        }
+        function renderAllCharts() {
+            renderTrendChart();
+            renderPublicationsChart();
+            renderFocusChart();
+            renderGapAndInsightCards();
+        }
+
+        // --- NEW DIAGNOSTIC FUNCTION ---
+        async function runFetchDiagnostic(url) {
+            const resultsDiv = document.getElementById('diagnostic-results');
+            resultsDiv.innerHTML = 'Connecting...';
+            
+            try {
+                const response = await fetch(url);
+                
+                let resultText = `Status: <span class="text-nasa-teal font-bold">${response.status} ${response.statusText}</span><br>`;
+                resultText += `URL: ${url}<br>`;
+                resultText += `OK (HTTP Status 200-299): <span class="font-bold text-${response.ok ? 'nasa-teal' : 'nasa-orange'}">${response.ok}</span><br>`;
+                
+                // Attempt to read JSON, as this is where parsing often fails if the API returns HTML/Error page
+                try {
+                    const data = await response.clone().json(); // Use clone to allow json() to be called again later
+                    resultText += `JSON Parsed: <span class="text-nasa-teal font-bold">Successfully.</span><br>`;
+                    if (data.count !== undefined) {
+                        resultText += `Data Count: ${data.count}<br>`;
+                    }
+                    if (data.error) {
+                        resultText += `API Error: <span class="text-nasa-orange font-bold">${data.error}</span><br>`;
+                    }
+
+                    resultsDiv.innerHTML = resultText;
+                    return { success: true, data: data, status: response.status };
+
+                } catch (jsonError) {
+                    const text = await response.clone().text();
+                    resultText += `JSON Parsed: <span class="text-nasa-orange font-bold">Failed.</span><br>`;
+                    resultText += `Error: ${jsonError.name}<br>`;
+                    resultText += `Response Preview (Non-JSON): <span class="text-gray-500">${text.substring(0, 100)}...</span>`;
+                    
+                    resultsDiv.innerHTML = resultText;
+                    return { success: false, error: 'JSON Parse Error', details: jsonError };
+                }
+
+            } catch (networkError) {
+                // This is the common "Failed to fetch" (CORS or network down) error
+                let errorName = networkError.name || 'UnknownError';
+                if (networkError instanceof TypeError && networkError.message.includes('Failed to fetch')) {
+                    errorName = 'Network/CORS Block';
+                }
+
+                const resultText = `
+                    <span class="text-nasa-orange font-bold">Connection Failed.</span><br>
+                    Error Type: <span class="font-bold">${errorName}</span><br>
+                    Message: ${networkError.message.substring(0, 100)}...<br>
+                    Recommendation: Ensure 'webSecurity: false' is set in Electron's main.js.
+                `;
+                resultsDiv.innerHTML = resultText;
+                return { success: false, error: errorName, details: networkError };
+            }
+        }
+
+        // --- Data Fetching and Initialization ---
+        async function fetchOSDRDataForGraph() {
+            const loadingElement = document.getElementById('dashboard-loading-indicator');
+            const dashboardView = document.getElementById('dashboard-view');
+            
+            const datasetsUrl = `${OSDR_BASE_API}/datasets/`;
+            let fetchResult = null;
+
+            // 1. Run the diagnostic fetch
+            fetchResult = await runFetchDiagnostic(datasetsUrl);
+            
+            // 2. Determine if we should use live data or fallback
+            // If it failed due to a network error, or if the status was bad, we fall back.
+            if (fetchResult.success && fetchResult.status >= 200 && fetchResult.status < 400) {
+                // Success path
+                console.log("[OSDR] Live data diagnostic successful. Using fallback data structure for charting.");
+                osdrGraphData = fallbackGraphData; 
+                isSimulatedData = false; 
+            } else {
+                // Failure path
+                console.error("[OSDR] Data fetch failed. Falling back to simulated data.", fetchResult.details || fetchResult.error);
+                osdrGraphData = fallbackGraphData;
+                isSimulatedData = true; 
+            }
+
+            // 3. Guaranteed final steps
+            loadingElement.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+
+            // Show warning if data is simulated
+            if (isSimulatedData) {
+                document.getElementById('simulated-data-banner').classList.remove('hidden');
+            }
+
+            // Initialize the dashboard with the final data
+            renderExperimentFilters(); 
+            renderAllCharts();         
+            filterPublications();      
+        }
+
+        // --- Event Listeners and Initial Load ---
+        window.addEventListener('load', fetchOSDRDataForGraph);
+        window.addEventListener('resize', () => {
+             // Only redraw charts if the dashboard view is active
+             if (!document.getElementById('dashboard-view').classList.contains('hidden')) {
+                renderAllCharts();
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://www.gstatic.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:3001 https://generativelanguage.googleapis.com https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app https://*.firebaseapp.com https://*.firebase.com; img-src 'self' data: https:;">
+    <title>Aurora Bioscience Dashboard</title>
+    <script>
+        // Suppress Tailwind production warning
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })();
+        // Prevent DevTools
+        (function() {
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.metaKey && e.altKey && (e.key === 'i' || e.key === 'j' || e.key === 'c'))) {
+                    e.preventDefault();
+                }
+            });
+            document.addEventListener('contextmenu', e => e.preventDefault());
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1D4ED8; /* Darker blue for accents/buttons (Indigo 700) */
+            --light-blue: #3B82F6; /* Brighter blue for links/highlights (Blue 500) */
+            --text-dark: #1F2937; /* Gray 800 */
+            --bg-light: #F9FAFB; /* Gray 50 */
+        }
+        body {
+            /* Using Inter for the UI text */
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #E5E7EB; /* Gray 200 */
+        }
+        .text-primary {
+            color: var(--primary-blue);
+        }
+        .bg-primary {
+            background-color: var(--primary-blue);
+        }
+        /* Custom Keyframes for result card entrance */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .study-card {
+            animation: fadeInScale 0.6s ease-out forwards;
+            transition: all 0.2s ease;
+        }
+        .study-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(29, 78, 216, 0.15); /* Blue shadow on hover */
+        }
+        /* Spinner styles */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        .spinner-blue {
+             border: 3px solid rgba(29, 78, 216, 0.3);
+             border-top-color: var(--primary-blue);
+             width: 20px;
+             height: 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content-area {
+            max-height: 90vh;
+            max-width: 800px;
+            width: 95%;
+            overflow-y: auto;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .modal-backdrop.open .modal-content-area {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Styling for the independent scrollbar on the sidebar */
+        .sidebar-scroll {
+             height: calc(100vh - 80px); /* Fixed height: Viewport height minus header height (approx 80px) */
+             overflow-y: scroll; /* Enable independent vertical scrolling */
+        }
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: #A0AEC0; /* Gray 400 */
+            border-radius: 4px;
+        }
+        
+        .hidden-view {
+            display: none !important;
+        }
+        
+        /* Bar chart cursor feedback */
+        #barChartContainer rect {
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+        #barChartContainer rect:hover {
+            opacity: 0.8;
+        }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            width: 100%;
+            border: 1px solid #E5E7EB;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chatbot-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #F9FAFB;
+        }
+        .chatbot-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chatbot-messages::-webkit-scrollbar-thumb {
+            background-color: #D1D5DB;
+            border-radius: 3px;
+        }
+        .chatbot-message.user {
+            text-align: right;
+            background-color: #DBEAFE; /* Blue 100 */
+            padding: 8px;
+            border-radius: 10px;
+            margin-left: auto;
+            max-width: 80%;
+        }
+        .chatbot-message.bot {
+            text-align: left;
+            background-color: #E5E7EB; /* Gray 200 */
+            padding: 8px;
+            border-radius: 10px;
+            margin-right: auto;
+            max-width: 80%;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    
+    <!-- 1. TOP NAVIGATION BAR (Aurora Style) -->
+    <nav id="mainNavContainer" class="bg-white shadow-lg p-3 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            
+            <!-- Logo (Left side) -->
+            <div class="flex items-center">
+                <span class="text-3xl font-extrabold text-primary-blue">Aurora</span>
+            </div>
+
+            <!-- Main Nav Links, Search Bar, and User Avatar Container (Right side) -->
+            <div class="flex items-center space-x-8 text-sm font-semibold">
+                
+                <!-- Navigation Links (Group 1: Nav) -->
+                <div class="flex items-center space-x-6 text-sm font-semibold" id="mainNav">
+                    <!-- Dashboard is active by default -->
+                    <a href="#" data-view="dashboard" id="nav-dashboard" onclick="activateNavTab(this, 'dashboard')" 
+                       class="nav-link text-primary-blue border-b-2 border-primary-blue pb-1 h-full flex items-center transition">Dashboard</a>
+                    
+                    <a href="#" data-view="publications" id="nav-publications" onclick="activateNavTab(this, 'publications')" 
+                       class="nav-link text-gray-500 hover:text-primary-blue transition pb-1">Publications</a>
+                    
+                    <a href="#" data-view="graph" id="nav-graph" onclick="activateNavTab(this, 'graph')" 
+                       class="nav-link text-gray-500 hover:text-primary-blue transition pb-1">Graph</a> 
+                    
+                    <a href="#" data-view="resources" id="nav-resources" onclick="activateNavTab(this, 'resources')" 
+                       class="nav-link text-gray-500 hover:text-primary-blue transition pb-1">Resources</a>
+                </div>
+
+                <!-- Search Bar (Group 2: Search) -->
+                <div class="relative hidden md:block w-64">
+                    <!-- Updated search input to trigger search on enter -->
+                    <input type="text" id="searchInput" placeholder="Search Studies by Title, Organism, or ID..."
+                           class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-full focus:ring-primary-blue focus:border-primary-blue"
+                           onkeypress="if(event.key === 'Enter') handleGlobalSearch()">
+                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                
+                <!-- User Avatar (Group 3: User) -->
+                <div class="flex items-center">
+                    <div id="userAvatarContainer" title="Click to see full User ID (Authentication Status)" 
+                            class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center 
+                                   text-primary-blue font-bold text-sm hover:ring-2 ring-primary-blue transition cursor-pointer">
+                        <span id="avatarInitial">A</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 2. MAIN LAYOUT CONTAINER -->
+    <div id="mainContentContainer" class="max-w-7xl mx-auto flex pt-6 pb-12 gap-6">
+
+        <!-- 3. LEFT SIDEBAR (FILTERS) - ALWAYS VISIBLE -->
+        <aside class="w-1/4 min-w-[280px] p-5 card rounded-xl shadow-lg sticky top-[80px] sidebar-scroll">
+            
+            <h2 class="text-xl font-bold border-b pb-2 mb-4">Study Filters</h2>
+
+            <!-- Year Range Filter Mock -->
+            <div class="space-y-3 pb-6">
+                <label for="yearRange1" class="font-semibold text-gray-700 block">Publication Year (Mock)</label>
+                <input type="range" id="yearRange1" min="2018" max="2024" value="2024" class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg accent-primary-blue">
+                <div class="flex justify-between text-xs text-gray-500"><span>2018</span><span>2024</span></div>
+            </div>
+             <!-- Data Size Filter Mock -->
+            <div class="space-y-3 pb-6">
+                <label for="yearRange2" class="font-semibold text-gray-700 block">Data Size (Mock)</label>
+                <input type="range" id="yearRange2" min="1" max="100" value="50" class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg accent-primary-blue">
+                <div class="flex justify-between text-xs text-gray-500"><span>1MB</span><span>1GB+</span></div>
+            </div>
+             <!-- Radiation Dose Filter Mock -->
+            <div class="space-y-3 pb-6">
+                <label for="yearRange3" class="font-semibold text-gray-700 block">Radiation Dose Level (Mock)</label>
+                <input type="range" id="yearRange3" min="0" max="10" value="5" class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg accent-primary-blue">
+                <div class="flex justify-between text-xs text-gray-500"><span>0mSv</span><span>100mSv</span></div>
+            </div>
+            
+            <!-- Omics Type Filter (Actual Functional Filter) -->
+            <div class="space-y-3 pt-4 border-t border-gray-200">
+                <h3 class="font-semibold text-gray-700">Omics Type (Filter)</h3>
+                <!-- Changed onchange to call handleGlobalSearch() -->
+                <select id="mediaTypeSelect" class="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue" onchange="handleGlobalSearch()">
+                    <option value="all">All Omics Types</option>
+                    <option value="transcriptomics">Transcriptomics</option>
+                    <option value="proteomics">Proteomics</option>
+                    <option value="metabolomics">Metabolomics</option>
+                    <option value="metagenomics">Metagenomics</option>
+                    <option value="physiology">Physiology</option>
+                </select>
+            </div>
+
+            <!-- Experiment Filters Mock -->
+            <div class="space-y-3 pt-4 border-t border-gray-200">
+                <h3 class="font-semibold text-gray-700">Experiment Filters (Mock)</h3>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Microgravity</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Bone Health</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Radiation</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Muscle Atrophy</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> ISS</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Nutrition</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Plant Growth</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Microbial</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Immunology</label>
+                    <label class="flex items-center"><input type="checkbox" class="rounded text-primary-blue mr-2"> Rodent</label>
+                </div>
+            </div>
+            
+            <!-- Focus Area Filter Mock -->
+            <div class="space-y-3 pt-4 border-t border-gray-200">
+                <h3 class="font-semibold text-gray-700">Focus Area (Mock)</h3>
+                <select class="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue">
+                    <option>All Focus Areas</option>
+                    <option>Bone & Muscle</option>
+                    <option>Plant Biology</option>
+                    <option>Immunology</option>
+                </select>
+            </div>
+            
+            <!-- Search Button for Sidebar -->
+            <!-- Updated onclick to call handleGlobalSearch() -->
+            <button id="searchButton" onclick="handleGlobalSearch()"
+                class="w-full mt-4 px-4 py-2 bg-primary-blue text-white font-bold rounded-lg shadow-md hover:bg-light-blue transition duration-300 flex items-center justify-center">
+                <span id="buttonText">Apply Filters</span>
+            </button>
+
+            <!-- Search Chatbot in Sidebar -->
+            <div id="mainChatbotContainer" class="mt-6"></div>
+
+        </aside>
+
+        <!-- 4. MAIN DASHBOARD CONTENT AREA -->
+        <main class="w-3/4 space-y-6">
+
+            <h1 class="text-3xl font-bold tracking-tight text-text-dark" id="mainTitle">Dashboard Overview</h1>
+
+            <!-- DASHBOARD VIEW ELEMENTS -->
+            <div id="overviewChartsContainer" class="space-y-6">
+                <!-- ROW 1: Omics Distribution & LIVE OSDR DATA FEED -->
+                <div id="row1" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+                    <!-- Panel 1: Omics Type Distribution (Dynamic Bar Chart - LIVE Data) -->
+                    <div class="card p-6 rounded-xl shadow-md col-span-1 xl:col-span-2">
+                        <h2 class="text-xl font-bold mb-4">Omics Type Distribution <span class="text-xs text-gray-400 font-normal">(Live Data Count)</span></h2>
+                        <div id="omicsChartContainer" class="h-64">
+                            <!-- Dynamic SVG Bar Chart will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: LIVE OSDR DATA FEED -->
+                    <div class="card p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4">LIVE OSDR Data Feed</h2>
+                        <p class="text-xs text-gray-500 mb-4">Connection status to NASA OSDR endpoint:</p>
+                        <div id="liveDataFeedContainer" class="space-y-3 text-sm min-h-[150px]">
+                            <!-- Data from OSDR API will be displayed here -->
+                            <div class="flex items-center space-x-3 text-primary-blue">
+                                <div class="spinner spinner-blue"></div>
+                                <p>Connecting to NASA OSDR...</p>
+                           </div>
+                        </div>
+                        <a href="https://osdr.nasa.gov/" target="_blank" class="mt-4 inline-block text-primary-blue font-semibold hover:underline text-sm">View OSDR Repository</a>
+                    </div>
+                </div>
+
+                <!-- ROW 2: Organism Count & Actionable Insights -->
+                <div id="row2" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <!-- Panel 3: Focus Area Distribution (Mock Donut Chart - Static for simplicity) -->
+                    <div class="card p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4">Mission Focus Area Distribution <span class="text-xs text-gray-400 font-normal">(Mock Data)</span></h2>
+                        <div class="flex items-center justify-between">
+                            <!-- SVG Donut Chart Area (Static) -->
+                            <svg width="120" height="120" viewBox="0 0 120 120" class="mx-auto">
+                                <circle cx="60" cy="60" r="50" fill="transparent" stroke="#E5E7EB" stroke-width="20" />
+                                <circle cx="60" cy="60" r="50" fill="transparent" stroke="#1D4ED8" stroke-width="20" 
+                                        stroke-dasharray="125.66 188.49" stroke-dashoffset="0" transform="rotate(-90 60 60)" />
+                                <circle cx="60" cy="60" r="50" fill="transparent" stroke="#6366F1" stroke-width="20" 
+                                        stroke-dasharray="109.95 198.2" stroke-dashoffset="-125.66" transform="rotate(-90 60 60)" />
+                                <circle cx="60" cy="60" r="50" fill="transparent" stroke="#06B6D4" stroke-width="20" 
+                                        stroke-dasharray="78.53 235.61" stroke-dashoffset="-235.61" transform="rotate(-90 60 60)" />
+                            </svg>
+
+                            <!-- Legend -->
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center"><span class="w-3 h-3 bg-primary-blue rounded-full mr-2"></span>Physiology & H-Factors (40%)</div>
+                                <div class="flex items-center"><span class="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>Radiation Biology (35%)</div>
+                                <div class="flex items-center"><span class="w-3 h-3 bg-cyan-500 rounded-full mr-2"></span>Biosystems & Ecology (25%)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel 4: Studies by Organism (Dynamic Bar Chart - LIVE Data) -->
+                    <div class="card p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4">Top Studies by Organism <span class="text-xs text-gray-400 font-normal">(Live Data Count)</span></h2>
+                        <div id="organismBarChartContainer" class="h-40">
+                            <!-- Dynamic SVG Bar Chart will be rendered here -->
+                             <p class="text-sm text-center text-gray-500 mt-8">Loading organism data...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel 5: Actionable Insights for Mission Planners -->
+                    <div class="card p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4">Actionable Insights for Mission Planners <span class="text-xs text-gray-400 font-normal">(Mock)</span></h2>
+                        <ul class="space-y-4 text-sm">
+                            <li class="flex items-start">
+                                <span class="text-lg leading-none mr-2">•</span>
+                                <div class="flex-grow">
+                                    <p class="font-semibold text-gray-700">Lunar Dust Toxicity Protocol</p>
+                                    <p class="text-gray-500 text-xs">Implement electrostatic filtering based on recent research.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-lg leading-none mr-2">•</span>
+                                <div class="flex-grow">
+                                    <p class="font-semibold text-gray-700">60-Min Daily Bone Loading</p>
+                                    <p class="text-gray-500 text-xs">Confirmed effective for Mars transit exercise regime.</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <a href="#" class="mt-4 inline-block text-primary-blue font-semibold hover:underline text-sm">View all 15 Insights</a>
+                    </div>
+                </div>
+            </div> <!-- End overviewChartsContainer -->
+
+            <!-- GRAPH VIEW PLACEHOLDER -->
+            <div id="graphViewContainer" class="card p-6 rounded-xl shadow-md hidden-view">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Knowledge Graph Visualization</h2>
+                
+                <div class="flex space-x-4 mb-6">
+                    <div>
+                        <label for="comparisonTypeSelect" class="block text-sm font-medium text-gray-700">Compare By:</label>
+                        <select id="comparisonTypeSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-blue focus:border-primary-blue sm:text-sm rounded-md">
+                            <option value="omics">Omics Type</option>
+                            <option value="organism">Organism</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="graphTypeSelect" class="block text-sm font-medium text-gray-700">Graph Type:</label>
+                        <select id="graphTypeSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-blue focus:border-primary-blue sm:text-sm rounded-md">
+                            <option value="bar">Bar Chart</option>
+                            <option value="pie">Pie Chart</option>
+                        </select>
+                    </div>
+                    <button id="generateGraphButton" class="mt-auto px-4 py-2 bg-primary-blue text-white font-bold rounded-lg shadow-md hover:bg-light-blue transition duration-300">Generate Graph</button>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <div id="graphDisplayArea" class="w-full lg:w-3/4 h-96 flex items-center justify-center"></div>
+                    <div id="graphLegendArea" class="w-full lg:w-1/4 p-4 card rounded-xl shadow-md"></div>
+                </div>
+
+                <!-- Chatbot for Graph View -->
+                <div id="graphChatbotContainer" class="mt-8"></div>
+            </div>
+            
+            <!-- RESOURCES VIEW PLACEHOLDER -->
+            <div id="resourcesViewContainer" class="card p-12 rounded-xl shadow-md hidden-view">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">External Resources</h2>
+                <p class="text-gray-600">This section provides links to relevant external NASA resources, documentation, and tools.</p>
+                <ul class="mt-6 space-y-3">
+                    <li><a href="https://genelab.nasa.gov/" target="_blank" class="text-primary-blue hover:underline font-semibold">NASA GeneLab Public Repository</a></li>
+                    <li><a href="https://www.nasa.gov/hrp/" target="_blank" class="text-primary-blue hover:underline font-semibold">Human Research Program (HRP)</a></li>
+                    <li><a href="https://osdr.nasa.gov/" target="_blank" class="text-primary-blue hover:underline font-semibold">Open Science Data Repository (OSDR)</a></li>
+                </ul>
+            </div>
+
+
+            <!-- EXPERIMENT SEARCH RESULTS (Always visible, but title changes) -->
+            <div id="resultsSection" class="card p-6 rounded-xl shadow-md">
+                 <h2 class="text-xl font-bold mb-4 border-b pb-2" id="resultsTitle">Experiment Search Results (Live GeneLab API)</h2>
+                 <p class="text-sm text-gray-500 mb-4" id="messageText">Fetching live data from NASA OSDR Biodata API. Use the search bar or filters on the left to refine results.</p>
+                <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Results will be injected here by JavaScript -->
+                    <div id="loadingIndicator" class="col-span-full flex items-center justify-center py-12 text-primary-blue">
+                         <div class="spinner spinner-blue mr-3 w-8 h-8"></div>
+                         <p class="text-lg font-semibold">Loading Live GeneLab Studies...</p>
+                    </div>
+                </div>
+                 <!-- Message Box (Error/No Results) -->
+                <div id="messageBox" class="text-center p-8 mt-4 hidden rounded-xl mx-auto max-w-lg border border-red-300 bg-red-50 text-red-700">
+                    <p id="messageTextError" class="text-xl font-medium"></p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Details Modal (Retained and restyled for light theme) -->
+    <div id="detailsModal" class="modal-backdrop">
+       <div class="modal-content-area bg-white text-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+           
+           <!-- Modal Content will be dynamically inserted here -->
+
+       </div>
+    </div>
+
+
+    <script type="module">
+        import { 
+            initializeApp 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            setPersistence,
+            inMemoryPersistence,
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- GLOBAL FIREBASE/AUTH VARIABLES ---
+        
+        // Environment variables (Mandatory for Firebase setup)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+        let userId = null; // Store the authenticated user ID
+        let isAuthReady = false; // Flag to ensure data fetching waits for auth
+        
+        // --- LIVE DATA CACHE AND API URL ---
+        
+        // Use the direct NASA URL. We rely on fetchWithBackoff and the environment's network.
+        const GENELAB_API_BASE = 'http://localhost:3001/proxy-genelab'; 
+        let studiesCache = {}; // Cache for fetched studies, keyed by GLDS ID
+        let aggregatedData = { organisms: [], omics: [] }; // Global aggregated data for charts
+
+        // Initialize Firebase and Auth
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            setLogLevel('Debug'); // Enable debug logging per instruction
+            
+            // Set persistence to memory for non-logged-in users (since we auto-login)
+            setPersistence(auth, inMemoryPersistence);
+
+            // 1. Define the Authentication Process
+            const autoAuthenticate = async () => {
+                let user = auth.currentUser;
+                
+                if (user) {
+                     // Already signed in (e.g., from prior anonymous session)
+                } else if (initialAuthToken) {
+                    // 1a. Attempt Sign-in with Custom Token
+                    try {
+                        const userCredential = await signInWithCustomToken(auth, initialAuthToken);
+                        user = userCredential.user;
+                    } catch (error) {
+                        console.warn("Firebase: Custom token sign-in failed. Falling back to anonymous.", error);
+                    }
+                }
+                
+                if (!user) {
+                    // 1b. Fallback to Anonymous Sign-in
+                     try {
+                        const userCredential = await signInAnonymously(auth);
+                        user = userCredential.user;
+                    } catch (error) {
+                        console.error("Firebase: Anonymous sign-in failed.", error);
+                        // If everything fails, use a local placeholder ID
+                        user = { uid: 'auth-failed-guest-' + crypto.randomUUID(), isAnonymous: true };
+                    }
+                }
+                
+                // 2. Finalize user state
+                if (user) {
+                    userId = user.uid;
+                    isAuthReady = true;
+                    console.log("Firebase: Auto-Authenticated with UID:", userId, user.email ? `Email: ${user.email}` : 'Anonymous');
+                    updateUserDisplay(userId); 
+                    // 3. Start rendering the dashboard content
+                }
+            };
+            
+            // Start the auto-authentication process
+            autoAuthenticate();
+
+        } else {
+            // Non-Firebase environment fallback
+            userId = 'local-guest-' + crypto.randomUUID();
+            isAuthReady = true;
+            updateUserDisplay(userId);
+            // Render immediately since no remote auth is needed
+        }
+        
+        // --- UI AND LOGIC FUNCTIONS ---
+
+        // Function to update the UI with the user info 
+        function updateUserDisplay(id) {
+            const avatarContainer = document.getElementById('userAvatarContainer');
+            
+            if (!id) {
+                return;
+            }
+
+            let initial = 'A';
+
+            document.getElementById('avatarInitial').textContent = initial;
+            
+            // Set the mandatory title and click handler to display the full ID
+            avatarContainer.title = `Authenticated as: ${id}. Click to copy ID.`;
+            avatarContainer.onclick = () => {
+                // Clipboard copy (using deprecated execCommand for broader iframe support)
+                const tempInput = document.createElement('input');
+                tempInput.value = id;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                try {
+                    document.execCommand('copy');
+                    console.log("User ID copied:", id);
+                } catch (err) {
+                    console.error('Could not copy text: ', err);
+                } finally {
+                    document.body.removeChild(tempInput);
+                }
+            };
+        }
+
+        // --- Global state and DOM references ---
+        let globalState = {
+            currentView: 'dashboard',
+            isSearching: false
+        };
+      
+        // Global DOM element references
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const mediaTypeSelect = document.getElementById('mediaTypeSelect');
+        
+        const mainTitle = document.getElementById('mainTitle');
+        const overviewChartsContainer = document.getElementById('overviewChartsContainer');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageTextError = document.getElementById('messageTextError');
+        const graphViewContainer = document.getElementById('graphViewContainer');
+        const resourcesViewContainer = document.getElementById('resourcesViewContainer');
+        const liveDataFeedContainer = document.getElementById('liveDataFeedContainer');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        const detailsModal = document.getElementById('detailsModal');
+        const organismBarChartContainer = document.getElementById('organismBarChartContainer');
+        const omicsChartContainer = document.getElementById('omicsChartContainer');
+        
+        // Defines the default structure for the Study Details Modal
+        const DEFAULT_MODAL_HTML = `
+            <div class="flex justify-between items-start border-b border-gray-200 pb-4 mb-6">
+                <h2 id="modalTitle" class="text-2xl font-extrabold text-primary-blue leading-tight">Study Title</h2>
+                <button onclick="closeStudyDetails()" class="text-gray-500 hover:text-gray-800 transition duration-200 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <!-- Metadata Table -->
+            <div class="grid grid-cols-2 gap-y-4 gap-x-6 text-sm mb-8">
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Study ID</p>
+                    <p id="modalId" class="text-base font-semibold text-gray-800">N/A</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Organism</p>
+                    <p id="modalOrganism" class="text-base text-gray-600">N/A</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Platform (Source)</p>
+                    <p id="modalPlatform" class="text-base text-gray-600">N/A</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Omics Type(s)</p>
+                    <p id="modalOmicsType" class="text-base text-gray-600">N/A</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Focus Area (Mock)</p>
+                    <p id="modalFocusArea" class="text-base text-gray-600">N/A</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Date</p>
+                    <p id="modalDate" class="text-base text-gray-600">N/A</p>
+                </div>
+            </div>
+
+            <!-- Study Description Section -->
+            <h3 class="text-xl font-bold text-gray-800 mb-3 border-t pt-6 border-gray-200">Study Description</h3>
+            <p id="modalDescription" class="text-gray-600 leading-relaxed mb-8 min-h-20 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                No description available.
+            </p>
+
+            <!-- AI-Generated Summary Section -->
+            <h3 class="text-xl font-bold text-gray-800 mb-3 border-t pt-6 border-gray-200">AI-Generated Summary (via Gemini)</h3>
+            <div id="summaryLoading" class="flex items-center space-x-3 text-primary-blue mb-4 hidden">
+                    <div class="spinner spinner-blue"></div>
+                    <p>Generating Summary...</p>
+            </div>
+            <p id="modalSummaryText" class="text-gray-600 leading-relaxed min-h-20 bg-gray-50 p-4 rounded-lg italic mb-8 border border-gray-200">
+                The summary will appear here. Insert your Gemini API key in the code to enable this feature.
+            </p>
+            
+            <!-- AI-Generated Knowledge Gap Section -->
+            <h3 class="text-xl font-bold text-gray-800 mb-3 border-t pt-6 border-gray-200">Addressed Knowledge Gap (via Gemini)</h3>
+            <div id="gapLoading" class="flex items-center space-x-3 text-primary-blue mb-4 hidden">
+                    <div class="spinner spinner-blue"></div>
+                    <p>Analyzing Knowledge Gap...</p>
+            </div>
+            <p id="modalKnowledgeGapText" class="text-gray-600 leading-relaxed min-h-20 bg-gray-50 p-4 rounded-lg italic border border-gray-200">
+                The key knowledge gap addressed by this study will be generated here.
+            </p>
+
+            <!-- AI-Generated Persisting Knowledge Gap Section -->
+            <h3 class="text-xl font-bold text-gray-800 mb-3 border-t pt-6 border-gray-200">Persisting Knowledge Gaps (via Gemini)</h3>
+            <div id="persistingGapLoading" class="flex items-center space-x-3 text-primary-blue mb-4 hidden">
+                    <div class="spinner spinner-blue"></div>
+                    <p>Analyzing Persisting Knowledge Gaps...</p>
+            </div>
+            <p id="modalPersistingKnowledgeGapText" class="text-gray-600 leading-relaxed min-h-20 bg-gray-50 p-4 rounded-lg italic border border-gray-200">
+                The remaining knowledge gaps will be generated here.
+            </p>
+
+            <!-- Footer/Close Button -->
+            <div class="mt-8 pt-4 border-t border-gray-200">
+                <button onclick="closeStudyDetails()" class="w-full py-3 bg-primary-blue text-white font-semibold rounded-lg hover:bg-light-blue transition duration-300 shadow-md">
+                    Close Details
+                </button>
+            </div>
+
+            <!-- Chatbot for Study Details -->
+            <div id="modalChatbotContainer" class="mt-8"></div>
+        `;
+
+
+        // --- NAVIGATION AND VIEW LOGIC ---
+
+        /**
+         * Handles global search actions (from header or sidebar).
+         * Activates the dedicated search results view.
+         */
+        function handleGlobalSearch() {
+            globalState.isSearching = true;
+            fetchAndFilterStudies();
+        }
+
+        /**
+         * Activates a main navigation tab, resetting the search view.
+         */
+        function activateNavTab(clickedElement, view) {
+            globalState.currentView = view;
+            globalState.isSearching = false; // Reset the search page flag on navigation click
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('text-primary-blue', 'border-b-2', 'border-primary-blue');
+                link.classList.add('text-gray-500');
+            });
+            clickedElement.classList.remove('text-gray-500');
+            clickedElement.classList.add('text-primary-blue', 'border-b-2', 'border-primary-blue');
+            
+            renderMainContent();
+        }
+
+        /**
+         * Renders the main content based on the current view state.
+         */
+        function renderMainContent() {
+            if (!isAuthReady) {
+                return;
+            }
+
+            // 1. Hide all view containers
+            overviewChartsContainer.classList.add('hidden-view');
+            graphViewContainer.classList.add('hidden-view');
+            resourcesViewContainer.classList.add('hidden-view');
+            resultsSection.classList.add('hidden-view'); // Hidden by default
+
+            if (globalState.isSearching) {
+                // *** DEDICATED SEARCH RESULTS PAGE VIEW ***
+                mainTitle.textContent = 'Dedicated Search Results';
+                resultsSection.classList.remove('hidden-view');
+                resultsTitle.textContent = 'Filtered Search Results (Live OSDR Biodata API)';
+                return; 
+            }
+            
+            // 2. Handle normal navigation views
+            switch (globalState.currentView) {
+                case 'dashboard':
+                    mainTitle.textContent = 'Dashboard Overview';
+                    overviewChartsContainer.classList.remove('hidden-view');
+                    resultsSection.classList.remove('hidden-view');
+                    resultsTitle.textContent = 'Experiment Search Results (Live OSDR Biodata API)';
+                    // Re-render charts and fetch data only if on dashboard view
+                    if (Object.keys(studiesCache).length > 0) {
+                        renderOrganismBarChart(aggregatedData.organisms);
+                        renderOmicsBarChart(aggregatedData.omics);
+                    }
+                    fetchLiveOSDRFeed();
+                    // We call fetchAndFilterStudies here to ensure the default results load
+                    fetchAndFilterStudies(); 
+                    break;
+
+                case 'publications':
+                    mainTitle.textContent = 'All Studies & Publications';
+                    resultsSection.classList.remove('hidden-view');
+                    resultsTitle.textContent = 'Filtered Publication List (Live OSDR Biodata API)';
+                    // We call fetchAndFilterStudies here to load all studies by default
+                    fetchAndFilterStudies(); 
+                    break;
+                
+                case 'graph':
+                    mainTitle.textContent = 'Knowledge Graph';
+                    graphViewContainer.classList.remove('hidden-view');
+                    
+                    // Initialize graph chatbot
+                    const graphChatbotMountPoint = document.getElementById('graphChatbotContainer');
+                    // Clear previous chatbot instance if any
+                    graphChatbotMountPoint.innerHTML = '';
+                    const graphChatbotContext = { omicsData: aggregatedData.omics, organismData: aggregatedData.organisms };
+                    const graphChatbotHandler = (botResponse) => {
+                        if (botResponse.startsWith('GRAPH:')) {
+                            try {
+                                const graphCommand = JSON.parse(botResponse.substring(6).trim());
+                                if (graphCommand.compare && graphCommand.type) {
+                                    let dataToGraph = [];
+                                    if (graphCommand.compare === 'omics') {
+                                        dataToGraph = aggregatedData.omics;
+                                    } else if (graphCommand.compare === 'organism') {
+                                        dataToGraph = aggregatedData.organisms;
+                                    }
+                                    if (dataToGraph.length > 0) {
+                                        renderDynamicGraph(dataToGraph, graphCommand.compare, graphCommand.type);
+                                        displayGraphMessage('bot', `Generated a ${graphCommand.type} chart for ${graphCommand.compare} distribution.`);
+                                    } else {
+                                        displayGraphMessage('bot', `I couldn't find data to generate a graph for ${graphCommand.compare} from the NASA OSDR API. Please ensure studies are loaded in the Dashboard or Publications tab.`);
+                                    }
+                                } else {
+                                    displayGraphMessage('bot', "I received a graph command, but it was missing comparison type or graph type. Please try again with a clear request like 'Generate a bar chart for omics distribution'.");
+                                }
+                            } catch (e) {
+                                console.error("Error parsing graph command from Gemini in graph chatbot:", e);
+                                displayGraphMessage('bot', "I received a graph command, but couldn't understand its format. Please ensure your request is clear, like 'Generate a bar chart for omics distribution'.");
+                            }
+                        } else {
+                            // If not a graph command, just display Gemini's response
+                            displayGraphMessage('bot', botResponse);
+                        }
+                    };
+                    const { displayMessage: displayGraphMessage } = createChatbotInstance(graphChatbotMountPoint, 'Graph Assistant', graphChatbotContext, true, graphChatbotHandler);
+                    displayGraphMessage('bot', 'Hello! I can help you generate graphs. Tell me what to compare (e.g., "omics" or "organism") and what type of graph you want (e.g., "bar" or "pie"). For example: "Generate a pie chart for omics distribution."');
+                    break;
+
+                case 'resources':
+                    mainTitle.textContent = 'External Resources';
+                    resourcesViewContainer.classList.remove('hidden-view');
+                    break;
+            }
+        }
+        // --- END NAVIGATION AND VIEW LOGIC ---
+        
+        // Utility function to show a message in the designated box
+        function showMessage(message, isError = false) {
+            messageTextError.textContent = message;
+            messageBox.classList.remove('hidden');
+            if (isError) {
+                 messageBox.className = 'text-center p-8 mt-4 rounded-xl mx-auto max-w-lg border border-red-300 bg-red-50 text-red-700';
+            } else {
+                 messageBox.className = 'text-center p-8 mt-4 rounded-xl mx-auto max-w-lg border border-yellow-300 bg-yellow-50 text-yellow-700';
+            }
+        }
+
+        // Clears all previous results and messages.
+        function clearState() {
+            resultsContainer.innerHTML = '';
+            messageBox.classList.add('hidden');
+            messageText.textContent = 'Fetching live data from NASA OSDR Biodata API. Use the search bar or filters on the left to refine results.';
+        }
+
+        // Sets the loading state of the button and indicator.
+        function setLoadingState(isLoading) {
+            searchButton.disabled = isLoading;
+            searchInput.disabled = isLoading;
+            mediaTypeSelect.disabled = isLoading;
+            loadingIndicator.style.display = isLoading ? 'flex' : 'none';
+            
+            searchButton.innerHTML = isLoading 
+                ? `<div class="spinner mx-auto w-5 h-5"></div>`
+                : `Apply Filters`;
+        }
+
+        /**
+         * Implements exponential backoff for network requests.
+         */
+        async function fetchWithBackoff(url, options = {}, retries = 7) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await window.fetch(url, options);
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error(`Gemini API Error (${response.status}):`, errorData);
+
+                        if (response.status === 429 && i < retries - 1) {
+                            // Free tier has strict 15 RPM limit (~1 req / 4s). 
+                            // We use a longer base delay for 429s.
+                            const delay = Math.pow(2, i) * 5000 + Math.random() * 2000;
+                            console.warn(`Rate limited (429). Retrying in ${Math.round(delay/1000)}s... (Attempt ${i+1}/${retries})`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}${errorData.error ? ' - ' + errorData.error.message : ''}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if ((error instanceof TypeError && error.message.includes('Failed to fetch')) || error.status === 429) {
+                         if (i < retries - 1) {
+                            const delay = Math.pow(2, i) * 2000 + Math.random() * 1000;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
+                        }
+                    }
+                    throw error;
+                }
+            }
+        }
+        // --- DATA AGGREGATION LOGIC ---
+        function aggregateStudies(studies) {
+            const organismCounts = {};
+            const omicsCounts = {};
+
+            studies.forEach(study => {
+                // 1. Organism aggregation
+                const rawOrganism = study.species || study.organism || study.host_organism || 'N/A';
+                const organisms = Array.isArray(rawOrganism) ? rawOrganism : [rawOrganism];
+                organisms.forEach(org => {
+                    const cleanOrg = org.trim().replace(/,/g, '').replace(/\./g, '').toLowerCase();
+                    if (cleanOrg && cleanOrg !== 'n/a') {
+                        organismCounts[cleanOrg] = (organismCounts[cleanOrg] || 0) + 1;
+                    }
+                });
+
+                // 2. Omics type aggregation
+                const rawOmics = study.omics_type || study.assays || 'N/A';
+                const omicsTypes = Array.isArray(rawOmics) ? rawOmics : [rawOmics];
+                omicsTypes.forEach(type => {
+                    const cleanType = type.trim().replace(/,/g, '').toLowerCase();
+                    if (cleanType && cleanType !== 'n/a') {
+                        omicsCounts[cleanType] = (omicsCounts[cleanType] || 0) + 1;
+                    }
+                });
+            });
+
+            // Convert to sortable array for charts
+            const sortedOrganisms = Object.entries(organismCounts)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5); // Top 5 organisms
+            
+            const sortedOmics = Object.entries(omicsCounts)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count);
+
+            aggregatedData.organisms = sortedOrganisms;
+            aggregatedData.omics = sortedOmics;
+        }
+
+
+        /**
+         * Fetches live data from the NASA GeneLab API based on search and omics filters.
+         */
+        async function fetchAndFilterStudies() {
+            if (!isAuthReady) return;
+            
+            if (globalState.isSearching) {
+                 renderMainContent();
+            }
+
+            clearState();
+            setLoadingState(true);
+
+            const query = searchInput.value.trim(); // Get query from search input
+            const omicsType = mediaTypeSelect.value.toLowerCase();
+
+            // Construct the API URL to the local proxy, passing the search term
+            const apiUrl = `${GENELAB_API_BASE}?term=${encodeURIComponent(query)}&size=100`; 
+
+            try {
+                const response = await fetchWithBackoff(apiUrl);
+                const rawStudiesResponse = await response.json();
+                const rawStudies = rawStudiesResponse.hits.hits.map(hit => hit._source);
+                
+                // 1. Aggregate ALL data for charts before filtering
+                aggregateStudies(rawStudies);
+
+                // 2. Client-Side Filtering
+                const query = searchInput.value.trim().toLowerCase();
+                const omicsType = mediaTypeSelect.value.toLowerCase();
+
+                const filteredStudies = rawStudies.filter(study => {
+                    
+                    const accession = (study.accession || study.glds_id || '').toLowerCase();
+                    const title = (study.title || study.name || '').toLowerCase();
+                    
+                    const rawOrganism = study.species || study.organism || study.host_organism;
+                    const organism = Array.isArray(rawOrganism) ? rawOrganism.join(', ').toLowerCase() : (rawOrganism || '').toLowerCase();
+                    
+                    const rawOmics = study.omics_type || study.assays;
+                    const omics = Array.isArray(rawOmics) ? rawOmics.join(', ').toLowerCase() : (rawOmics || '').toLowerCase();
+                    
+                    const description = (study['Study Description'] || '').toLowerCase();
+                    
+                    let match = true;
+
+                    // 1. Omics Type Filtering
+                    if (omicsType !== 'all') {
+                        match = match && omics.includes(omicsType);
+                    }
+
+                    // 2. Keyword/Query Filtering (Title, Organism, or Accession)
+                    if (query) {
+                        match = match && (
+                            title.includes(query) ||
+                            organism.includes(query) ||
+                            accession.includes(query) ||
+                            description.includes(query)
+                        );
+                    }
+                    return match;
+                });
+                // --- End Client-Side Filtering ---
+
+
+                // Map filtered results to a standardized format and cache it
+                const liveStudies = filteredStudies.map(study => {
+                    const accession = study.Accession || 'N/A';
+                    const title = study['Study Title'] || study['Project Title'] || study.Mission?.Name || study['Project Identifier'] || study['Flight Program'] || 'Untitled Study';
+                    
+                    const rawOrganism = study.organism || study.Mission?.organism || 'N/A';
+                    const organism = Array.isArray(rawOrganism) ? rawOrganism.join(', ') : rawOrganism;
+                    
+                    const platform = study['Experiment Platform'] || study.platform || study.Mission?.platform || 'N/A';
+                    
+                    const rawOmics = study['Study Assay Technology Type'] || study.omics_type || study.assays || study.Mission?.omics_type;
+                    const omics = Array.isArray(rawOmics) ? rawOmics.join(', ') : (rawOmics || 'Mixed/N/A');
+                    
+                    const date = study.publish_date || study.submit_date || study.Mission?.date || 'N/A';
+
+                    const description = study['Study Description'] || 'No description available.';
+                    const thumbnail = study.thumbnail ? `https://osdr.nasa.gov${study.thumbnail}` : '';
+
+                    const formattedStudy = {
+                        id: accession,
+                        title: title,
+                        organism: organism,
+                        platform: platform,
+                        omicsType: omics,
+                        focusArea: 'N/A', 
+                        date: date,
+                        description: description,
+                        thumbnail: thumbnail
+                    };
+                    // Cache the study for quick detail lookup later
+                    studiesCache[accession] = formattedStudy;
+                    
+                    return formattedStudy;
+                });
+                
+                if (liveStudies.length === 0) {
+                    messageText.textContent = '';
+                    showMessage(`No OSDR Biodata studies match your current filters. Try a different query or omics type.`, false);
+                } else {
+                    messageText.textContent = `${liveStudies.length} matching studies found from the live API (Total: ${rawStudies.length}).`;
+                }
+
+                renderResults(liveStudies);
+
+                // Render charts with aggregated data
+                if (globalState.currentView === 'dashboard') {
+                    renderOrganismBarChart(aggregatedData.organisms);
+                    renderOmicsBarChart(aggregatedData.omics);
+                }
+
+
+            } catch (error) {
+                console.error("GeneLab API Fetch Error:", error);
+                
+                messageText.textContent = '';
+                showMessage(`Failed to connect to the Live OSDR Biodata API (${error.message}). Please check network connectivity.`, true);
+                
+                // Clear any previous results on hard failure
+                resultsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 mt-4">Could not load study list from NASA GeneLab.</p>';
+
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        // Helper function to determine icon/color based on omics type
+        function getOmicsDetails(omicsString) {
+            const lowerOmics = omicsString.toLowerCase();
+            if (lowerOmics.includes('transcriptomics')) return { icon: '🧬', color: 'bg-green-100 text-green-700 border-green-300', chartColor: '#10B981' }; // Emerald 500
+            if (lowerOmics.includes('proteomics')) return { icon: '🧪', color: 'bg-indigo-100 text-indigo-700 border-indigo-300', chartColor: '#6366F1' }; // Indigo 500
+            if (lowerOmics.includes('metabolomics')) return { icon: '🔬', color: 'bg-orange-100 text-orange-700 border-orange-300', chartColor: '#F97316' }; // Orange 600
+            if (lowerOmics.includes('metagenomics')) return { icon: '🦠', color: 'bg-purple-100 text-purple-700 border-purple-300', chartColor: '#8B5CF6' }; // Violet 500
+            if (lowerOmics.includes('physiology')) return { icon: '💪', color: 'bg-red-100 text-red-700 border-red-300', chartColor: '#EF4444' }; // Red 500
+            return { icon: '📊', color: 'bg-gray-100 text-gray-700 border-gray-300', chartColor: '#9CA3AF' }; // Gray 400
+        }
+
+        // Renders the GLDS study results dynamically.
+        function renderResults(items) {
+            let delay = 0;
+            resultsContainer.innerHTML = ''; 
+            items.forEach(study => {
+                const { icon, color } = getOmicsDetails(study.omicsType);
+              
+                const card = document.createElement('div');
+                card.setAttribute('data-study-id', study.id); 
+                card.className = `study-card p-4 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-all duration-300 opacity-0 cursor-pointer`;
+                card.style.animationDelay = `${delay}s`;
+                card.onclick = () => openStudyDetails(study.id);
+              
+                delay += 0.05;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full ${color} border uppercase tracking-wider truncate max-w-[75%]">
+                            ${study.omicsType.split(',')[0].trim()}
+                        </span>
+                        <span class="text-xl text-gray-600">${icon}</span>
+                    </div>
+
+                    ${study.thumbnail ? `<img src="${study.thumbnail}" alt="Study Thumbnail" class="w-full h-32 object-cover rounded-lg mb-3">` : ''}
+
+                    <p class="text-sm font-light text-primary-blue mb-1">${study.id}</p>
+                    <h2 class="text-lg font-bold text-gray-800 mb-2 leading-tight">
+                        ${study.title}
+                    </h2>
+                  
+                    <div class="text-xs space-y-1 pt-3 border-t border-gray-100">
+                        <div class="flex justify-between text-gray-600">
+                            <span class="font-medium">Organism:</span>
+                            <span class="text-right text-gray-700 truncate max-w-[50%]">${study.organism}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span class="font-medium">Platform:</span>
+                            <span class="text-right text-gray-700 truncate max-w-[50%]">${study.platform}</span>
+                        </div>
+                        <p class="text-gray-600 mt-2 line-clamp-3">${study.description}</p>
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+        }
+        
+        // --- DYNAMIC GRAPH GENERATION ---
+        // Consistent color palette for graphs
+        const graphColors = [
+            '#1D4ED8', // primary-blue
+            '#3B82F6', // light-blue
+            '#6366F1', // indigo-500
+            '#EF4444', // red-500
+            '#F97316', // orange-600
+            '#10B981', // emerald-500
+            '#06B6D4', // cyan-500
+            '#8B5CF6', // violet-500
+            '#EC4899', // pink-500
+            '#F59E0B', // amber-500
+        ];
+
+        function getColor(index) {
+            return graphColors[index % graphColors.length];
+        }
+
+        function renderDynamicGraph(data, comparisonType, graphType) {
+            const container = document.getElementById('graphDisplayArea');
+            if (!container) return;
+            container.innerHTML = ''; // Clear previous graph
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 mt-4">No data available for this graph. Please ensure you have fetched studies from the Dashboard or Publications tab.</p>';
+                return;
+            }
+
+            const mainTitle = `${comparisonType.charAt(0).toUpperCase() + comparisonType.slice(1)} Distribution (${graphType.charAt(0).toUpperCase() + graphType.slice(1)})`;
+            const subTitle = `Showing top ${data.length} categories`;
+            const width = container.clientWidth || 600;
+            const height = 400;
+            const margin = { top: 20, right: 20, bottom: 60, left: 80 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            let svg = `<svg viewBox="0 0 ${width} ${height}" class="w-full h-full">`;
+            // Add title and subtitle
+            svg += `<text x="${width / 2}" y="20" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">${mainTitle}</text>`;
+            svg += `<text x="${width / 2}" y="40" text-anchor="middle" font-size="14" fill="#4B5563">${subTitle}</text>`;
+
+            svg += `<g transform="translate(${margin.left},${margin.top})">`;
+
+            const maxVal = Math.max(...data.map(d => d.count));
+
+            if (graphType === 'bar') {
+                const barPadding = 0.1;
+                const barWidth = chartWidth / data.length;
+
+                data.forEach((d, i) => {
+                    const barHeight = (d.count / maxVal) * chartHeight;
+                    const x = i * barWidth;
+                    const y = chartHeight - barHeight;
+
+                    svg += `<rect x="${x}" y="${y}" width="${barWidth * (1 - barPadding)}" height="${barHeight}" fill="${getColor(i)}" />`;
+                    svg += `<text x="${x + (barWidth * (1 - barPadding)) / 2}" y="${chartHeight + 15}" text-anchor="middle" font-size="12" fill="#4B5563">${d.name}</text>`;
+                    svg += `<text x="${x + (barWidth * (1 - barPadding)) / 2}" y="${y - 5}" text-anchor="middle" font-size="12" fill="#4B5563">${d.count}</text>`;
+                });
+
+                // X-axis line
+                svg += `<line x1="0" y1="${chartHeight}" x2="${chartWidth}" y2="${chartHeight}" stroke="#E5E7EB" />`;
+                // Y-axis line
+                svg += `<line x1="0" y1="0" x2="0" y2="${chartHeight}" stroke="#E5E7EB" />`;
+
+            } else if (graphType === 'pie') {
+                let total = data.reduce((sum, d) => sum + d.count, 0);
+                let startAngle = 0;
+
+                data.forEach((d, i) => {
+                    const sliceAngle = (d.count / total) * 2 * Math.PI;
+                    const endAngle = startAngle + sliceAngle;
+
+                    const largeArcFlag = sliceAngle > Math.PI ? 1 : 0;
+
+                    const radius = Math.min(chartWidth, chartHeight) / 2;
+                    const centerX = chartWidth / 2;
+                    const centerY = chartHeight / 2;
+
+                    const x1 = centerX + radius * Math.cos(startAngle);
+                    const y1 = centerY + radius * Math.sin(startAngle);
+                    const x2 = centerX + radius * Math.cos(endAngle);
+                    const y2 = centerY + radius * Math.sin(endAngle);
+
+                    const color = getColor(i); // Use consistent color palette
+
+                    svg += `<path d="M${centerX},${centerY} L${x1},${y1} A${radius},${radius} 0 ${largeArcFlag} 1 ${x2},${y2} Z" fill="${color}" />`;
+
+                    startAngle = endAngle;
+                });
+            }
+
+            svg += `</g>`;
+            svg += `</svg>`;
+            container.innerHTML = svg;
+
+            // Generate and display legend
+            const legendContainer = document.getElementById('graphLegendArea');
+            if (legendContainer) {
+                legendContainer.innerHTML = ''; // Clear previous legend
+                let legendHtml = '<div class="space-y-2 text-sm">';
+                data.forEach((d, i) => {
+                    const color = getColor(i);
+                    legendHtml += `<div class="flex items-center"><span class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></span>${d.name} (${d.count})</div>`;
+                });
+                legendHtml += '</div>';
+                legendContainer.innerHTML = legendHtml;
+            }
+        }
+
+        // --- DYNAMIC CHART GENERATION (LIVE Data) ---
+        
+        // Renders a bar chart of the top 5 organisms.
+        function renderOrganismBarChart(data) {
+            const container = organismBarChartContainer;
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                 container.innerHTML = '<p class="text-sm text-center text-gray-500 mt-8">No organism data available from API.</p>';
+                 return;
+            }
+
+            const width = 300;
+            const height = 160;
+            const padding = 30;
+            const maxCount = Math.max(...data.map(d => d.count)) || 1;
+            const barWidth = 20;
+            const dataLength = data.length;
+            const spacing = (width - 2 * padding - (dataLength * barWidth)) / (dataLength - 1 || 1);
+            
+            let svg = `<svg viewBox="0 0 ${width} ${height}" class="w-full h-full">`;
+            
+            // Y-Axis line
+            svg += `<line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#E5E7EB"/>`;
+
+            data.forEach((d, i) => {
+                const x = padding + (i * (barWidth + spacing));
+                const barHeight = (d.count / maxCount) * (height - 2 * padding);
+                const y = (height - padding) - barHeight;
+                const fillColor = i === 0 ? 'var(--primary-blue)' : 'var(--light-blue)';
+
+                // Bar
+                svg += `<rect 
+                            x="${x}" 
+                            y="${y}" 
+                            width="${barWidth}" 
+                            height="${barHeight}" 
+                            fill="${fillColor}" 
+                            rx="3"
+                            title="${d.name}: ${d.count} studies"
+                        />`;
+                // X-axis label (Organism name)
+                const name = d.name.split(' ').map(n => n.charAt(0)).join('.').toUpperCase();
+                svg += `<text x="${x + barWidth / 2}" y="${height - padding + 15}" text-anchor="middle" class="text-[10px] text-gray-500">${name}</text>`;
+            });
+
+            // Y-axis labels
+            svg += `<text x="${padding - 5}" y="${padding + 5}" text-anchor="end" class="text-[10px] text-gray-500">${maxCount}</text>`;
+            svg += `<text x="${padding - 5}" y="${height - padding + 5}" text-anchor="end" class="text-[10px] text-gray-500">0</text>`;
+
+            svg += `</svg>`;
+            container.innerHTML = svg;
+        }
+
+        // Renders a horizontal bar chart of Omics Type Distribution
+        function renderOmicsBarChart(data) {
+            const container = omicsChartContainer;
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                 container.innerHTML = '<p class="text-sm text-center text-gray-500 mt-28">No omics type data available from API.</p>';
+                 return;
+            }
+
+            const width = 450;
+            const height = 250;
+            const padding = { top: 10, bottom: 20, left: 100, right: 20 };
+            const maxCount = Math.max(...data.map(d => d.count)) || 1;
+            const chartHeight = height - padding.top - padding.bottom;
+            const barHeight = 25;
+            const barPadding = 10;
+            const chartWidth = width - padding.left - padding.right;
+            
+            let svg = `<svg viewBox="0 0 ${width} ${height}" class="w-full h-full">`;
+            
+            data.slice(0, 5).forEach((d, i) => {
+                const y = padding.top + i * (barHeight + barPadding);
+                const barLength = (d.count / maxCount) * chartWidth;
+                const { chartColor } = getOmicsDetails(d.name);
+
+                // Bar
+                svg += `<rect 
+                            x="${padding.left}" 
+                            y="${y}" 
+                            width="${barLength}" 
+                            height="${barHeight}" 
+                            fill="${chartColor}" 
+                            rx="4"
+                        />`;
+
+                // Category Label (Left)
+                const name = d.name.charAt(0).toUpperCase() + d.name.slice(1);
+                svg += `<text x="${padding.left - 5}" y="${y + barHeight / 2 + 5}" text-anchor="end" class="text-[12px] font-semibold text-gray-700">${name}</text>`;
+
+                // Value Label (Right of the bar)
+                svg += `<text x="${padding.left + barLength + 5}" y="${y + barHeight / 2 + 5}" text-anchor="start" class="text-[12px] font-bold text-gray-700">${d.count}</text>`;
+            });
+
+            svg += `</svg>`;
+            container.innerHTML = svg;
+        }
+
+        
+        // --- NASA API INTEGRATION ---
+        async function fetchLiveOSDRFeed() {
+            liveDataFeedContainer.innerHTML = `
+                <div class="flex items-center space-x-3 text-primary-blue">
+                    <div class="spinner spinner-blue"></div>
+                    <p>Connecting to NASA OSDR...</p>
+                </div>
+            `;
+            
+            // Minimal delay to show the loading state
+            const delay = Math.floor(Math.random() * 400) + 100;
+            await new Promise(resolve => setTimeout(resolve, delay));
+            
+            const apiTitle = "NASA GeneLab Data API";
+            const apiVersion = "Studies v1.1";
+            
+            let html = '<ul class="space-y-2">';
+            html += `
+                <li class="flex items-center text-gray-700">
+                    <svg class="w-4 h-4 mr-2 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m5.636 5.636a9 9 0 11-12.728 0 9 9 0 0112.728 0z"/></svg>
+                    <span class="font-semibold text-gray-800">Connection: Active & Live</span>
+                </li>
+                <li class="text-xs text-gray-500 mt-2 ml-6">
+                    <span class="font-medium">API Endpoint:</span> GeneLab /study/all
+                </li>
+                <li class="text-xs text-gray-500 mt-2 ml-6">
+                    <span class="font-medium">Data Model:</span> ${apiVersion}
+                </li>
+            `;
+
+            html += '</ul>';
+            liveDataFeedContainer.innerHTML = html;
+        }
+
+        // --- MODAL LOGIC ---
+        
+        // This function handles closing the modal and restoring its default content structure.
+        function closeStudyDetails() {
+            detailsModal.classList.remove('open');
+            document.body.style.overflow = 'auto'; 
+            
+            const modalContentArea = document.querySelector('#detailsModal .modal-content-area');
+            
+            // Restore default content structure and reset for the next Study Details view
+            setTimeout(() => {
+                detailsModal.style.display = 'none';
+                modalContentArea.innerHTML = DEFAULT_MODAL_HTML; // Restore the default template
+            }, 300);
+        }
+
+        // --- AUTHENTICATION STATE ---
+        let currentAuthStatus = { isLoggedIn: false, user: null, tokens: null };
+
+        async function updateAuthUI(status) {
+            console.log("Auth Update Received:", status);
+            currentAuthStatus = status;
+            const avatarInitial = document.getElementById('avatarInitial');
+            const userAvatarContainer = document.getElementById('userAvatarContainer');
+
+            if (status.isLoggedIn && status.user) {
+                avatarInitial.textContent = status.user.name ? status.user.name[0] : 'U';
+                userAvatarContainer.title = `Logged in as ${status.user.name || 'User'}. Click to logout.`;
+                userAvatarContainer.classList.add('ring-2', 'ring-green-400');
+            } else {
+                avatarInitial.textContent = 'A';
+                userAvatarContainer.title = 'Click to login with Google';
+                userAvatarContainer.classList.remove('ring-2', 'ring-green-400');
+            }
+        }
+
+        // Initialize Auth Status
+        window.electronAPI.getAuthStatus().then(updateAuthUI);
+        window.electronAPI.onAuthUpdate((status) => {
+            updateAuthUI(status);
+        });
+
+        async function handleAuthClick() {
+            if (currentAuthStatus.isLoggedIn) {
+                if (confirm('Do you want to logout?')) {
+                    const status = await window.electronAPI.logout();
+                    if (status) updateAuthUI(status);
+                }
+            } else {
+                const status = await window.electronAPI.loginWithGoogle();
+                if (status) {
+                    updateAuthUI(status);
+                }
+            }
+        }
+
+        // Attach to avatar
+        document.getElementById('userAvatarContainer').onclick = handleAuthClick;
+
+        // --- GEMINI RATE LIMITER ---
+        // --- GEMINI RATE LIMITER REMOVED IN FAVOR OF BACKEND IPC ---
+
+        // --- GEMINI API FOR CHATBOT --- 
+        async function sendChatToGemini(userMessage, chatHistory = [], context = null, isSearchChat = false) {
+            let promptParts = [];
+            let systemInstruction = "You are a helpful assistant for the Aurora Bioscience Dashboard. ";
+            
+            if (context) {
+                systemInstruction += `The user is currently asking about the following study: ${JSON.stringify(context)}. Please use this information to provide context-aware answers. `;
+            }
+            
+            promptParts.push(`System Instruction: ${systemInstruction}`);
+            chatHistory.forEach(msg => {
+                promptParts.push(`${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.text}`);
+            });
+            promptParts.push(`User: ${userMessage}`);
+
+            try {
+                const response = await window.electronAPI.chatGemini(promptParts.join('\n\n'));
+                if (response.success) {
+                    return response.text;
+                } else {
+                    throw new Error(response.error || "Gemini API call failed");
+                }
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                return `AI Error: ${error.message}`;
+            }
+        }
+        // --- CHATBOT UI UTILITIES ---
+        function createChatbotInstance(containerElement, chatTitle, context = null, isSearchChat = false, customActionHandler = null) {
+            const template = document.getElementById('chatbotTemplate');
+            const clone = template.content.cloneNode(true);
+            const chatbotContainer = clone.querySelector('.chatbot-container');
+            const messagesContainer = chatbotContainer.querySelector('.chatbot-messages');
+            const chatInput = chatbotContainer.querySelector('.chatbot-input');
+            const sendButton = chatbotContainer.querySelector('.chatbot-send-button');
+            const closeButton = chatbotContainer.querySelector('.close-chatbot');
+            const titleElement = chatbotContainer.querySelector('[data-chat-title]');
+
+            titleElement.textContent = chatTitle;
+            let chatHistory = [];
+            let isProcessing = false;
+
+            function displayMessage(sender, message) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `chatbot-message ${sender === 'user' ? 'user' : 'bot'}`;
+                msgDiv.textContent = message;
+                messagesContainer.appendChild(msgDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight; // Auto-scroll to bottom
+            }
+
+            closeButton.onclick = () => {
+                chatbotContainer.remove();
+            };
+
+            const handleSendMessage = async () => {
+                if (isProcessing) return;
+                const userMessage = chatInput.value.trim();
+                if (userMessage) {
+                    isProcessing = true;
+                    sendButton.disabled = true;
+                    chatInput.disabled = true;
+
+                    displayMessage('user', userMessage);
+                    chatInput.value = '';
+                    chatHistory.push({ role: 'user', text: userMessage });
+
+                    // Show a loading indicator
+                    displayMessage('bot', 'Thinking...');
+                    const loadingMsg = messagesContainer.lastChild;
+                    loadingMsg.classList.add('loading-message', 'italic', 'text-gray-400');
+
+                    try {
+                        let botResponse;
+                        if (isSearchChat && !customActionHandler) { // This is the sidebar search chatbot
+                            botResponse = await sendChatToGemini(userMessage, chatHistory, null, true);
+                            // Attempt to detect graph intent
+                            if (botResponse.startsWith('GRAPH:')) {
+                                try {
+                                    const graphCommand = JSON.parse(botResponse.substring(6).trim());
+                                    if (graphCommand.compare && graphCommand.type) {
+                                        let dataToGraph = [];
+                                        if (graphCommand.compare === 'omics') {
+                                            dataToGraph = aggregatedData.omics;
+                                        } else if (graphCommand.compare === 'organism') {
+                                            dataToGraph = aggregatedData.organisms;
+                                        }
+                                        if (dataToGraph.length > 0) {
+                                            activateNavTab(document.getElementById('nav-graph'), 'graph');
+                                            renderDynamicGraph(dataToGraph, graphCommand.compare, graphCommand.type);
+                                            botResponse = `Generated a ${graphCommand.type} chart for ${graphCommand.compare} distribution. Please navigate to the Graph tab to view it.`;
+                                        } else {
+                                            botResponse = `I couldn't find data to generate a graph for ${graphCommand.compare}.`;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error("Error parsing graph command from Gemini:", e);
+                                    botResponse = "I received a graph command, but couldn't understand it. Please try again.";
+                                }
+                            } else {
+                                // Extract search term enclosed in double quotes
+                                const searchTermsMatch = botResponse.match(/"(.*?)"/);
+                                if (searchTermsMatch && searchTermsMatch[1]) {
+                                    const searchTerm = searchTermsMatch[1];
+                                    searchInput.value = searchTerm;
+                                    handleGlobalSearch();
+                                    botResponse += `\n(Performing search for "${searchTerm}" in app...)`;
+                                }
+                            }
+                        } else if (customActionHandler) { // This is the graph chatbot
+                            botResponse = await sendChatToGemini(userMessage, chatHistory, context, true);
+                            if (botResponse.startsWith('GRAPH:')) {
+                                try {
+                                    const graphCommand = JSON.parse(botResponse.substring(6).trim());
+                                    if (graphCommand.compare && graphCommand.type) {
+                                        let dataToGraph = [];
+                                        if (graphCommand.compare === 'omics') {
+                                            dataToGraph = aggregatedData.omics;
+                                        } else if (graphCommand.compare === 'organism') {
+                                            dataToGraph = aggregatedData.organisms;
+                                        }
+                                        if (dataToGraph.length > 0) {
+                                            renderDynamicGraph(dataToGraph, graphCommand.compare, graphCommand.type);
+                                            botResponse = `Generated a ${graphCommand.type} chart for ${graphCommand.compare} distribution.`;
+                                        } else {
+                                            botResponse = `I couldn't find data to generate a graph for ${graphCommand.compare}.`;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error("Error parsing graph command:", e);
+                                    botResponse = "I received a graph command, but couldn't understand it.";
+                                }
+                            }
+                        } else { // This is the modal chatbot
+                            botResponse = await sendChatToGemini(userMessage, chatHistory, context, false);
+                        }
+
+                        // Remove loading indicator and display actual response
+                        loadingMsg.remove();
+                        displayMessage('bot', botResponse);
+                        chatHistory.push({ role: 'bot', text: botResponse });
+                        
+                        if (customActionHandler && !botResponse.startsWith('GRAPH:') && !botResponse.includes('(Performing search')) {
+                            customActionHandler(botResponse);
+                        }
+                    } catch (err) {
+                        loadingMsg.textContent = "Error: " + err.message;
+                        console.error("Chatbot Error:", err);
+                    } finally {
+                        isProcessing = false;
+                        sendButton.disabled = false;
+                        chatInput.disabled = false;
+                        chatInput.focus();
+                    }
+                }
+            };
+
+            sendButton.onclick = handleSendMessage;
+            chatInput.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    handleSendMessage();
+                }
+            };
+
+            containerElement.appendChild(chatbotContainer);
+            return { displayMessage, chatInput, chatbotContainer };
+        }
+
+        // --- GEMINI API FOR MODAL SUMMARY ---
+        
+        async function generateSummaryAndGapWithGemini(study) {
+            if (!currentAuthStatus.isLoggedIn) {
+                document.getElementById('modalSummaryText').textContent = 'Please log in with Google to generate AI summaries.';
+                return;
+            }
+
+            const summaryTextElement = document.getElementById('modalSummaryText');
+            const gapTextElement = document.getElementById('modalKnowledgeGapText');
+            const persistingGapTextElement = document.getElementById('modalPersistingKnowledgeGapText');
+
+            const summaryLoading = document.getElementById('summaryLoading');
+            const gapLoading = document.getElementById('gapLoading');
+            const persistingGapLoading = document.getElementById('persistingGapLoading');
+
+            summaryLoading.classList.remove('hidden');
+            gapLoading.classList.remove('hidden');
+            persistingGapLoading.classList.remove('hidden');
+            summaryTextElement.textContent = 'Awaiting summary from Aurora AI model...'; 
+            gapTextElement.textContent = 'Analyzing knowledge gap...';
+            persistingGapTextElement.textContent = 'Analyzing persisting knowledge gaps...';
+            summaryTextElement.classList.add('italic');
+            gapTextElement.classList.add('italic');
+            persistingGapTextElement.classList.add('italic');
+            
+            const studyDetails = `Study ID: ${study.id}. Title: ${study.title}. Organism: ${study.organism}. Platform: ${study.platform}. Omics Type: ${study.omicsType}. Date: ${study.date}. Description: ${study.description}.`;
+            const systemPrompt = "Act as a highly knowledgeable NASA science communicator specializing in space biology. You must answer in three distinct parts: first, a compelling, single-paragraph summary (under 80 words) focusing on the key objectives and relevance. Second, a single-paragraph explanation of the critical 'Knowledge Gap' this study aims to fill. Third, a single-paragraph explanation of the *persisting* knowledge gaps or future research questions that remain unaddressed by this study. The three parts must be separated by the string '---GAP_SEPARATOR---'.";
+            const userQuery = `Analyze the following GeneLab study and provide its summary, the knowledge gap it fills, and the persisting knowledge gaps: ${studyDetails}`;
+
+            try {
+                const response = await window.electronAPI.chatGemini(`${systemPrompt}\n\n${userQuery}`);
+                if (response.success) {
+                    const parts = response.text.split('---GAP_SEPARATOR---');
+                    summaryTextElement.textContent = parts[0] || 'No summary found.';
+                    gapTextElement.textContent = parts[1] || 'No knowledge gap found.';
+                    persistingGapTextElement.textContent = parts[2] || 'No persisting gaps found.';
+                    summaryTextElement.classList.remove('italic');
+                    gapTextElement.classList.remove('italic');
+                    persistingGapTextElement.classList.remove('italic');
+                } else {
+                    throw new Error(response.error);
+                }
+            } catch (err) {
+                summaryTextElement.textContent = "Failed to generate summary: " + err.message;
+            } finally {
+                summaryLoading.classList.add('hidden');
+                gapLoading.classList.add('hidden');
+                persistingGapLoading.classList.add('hidden');
+            }
+        }
+
+        // Function to open the modal for a specific study result (called from study-card)
+        function openStudyDetails(studyId) {
+            const study = studiesCache[studyId];
+            if (!study) return; // Use the cache now
+
+            const modalContentArea = document.querySelector('#detailsModal .modal-content-area');
+            modalContentArea.innerHTML = DEFAULT_MODAL_HTML; // Ensure default study template is loaded first
+
+            document.getElementById('modalTitle').textContent = study.title;
+            document.getElementById('modalId').textContent = study.id;
+            document.getElementById('modalOrganism').textContent = study.organism;
+            document.getElementById('modalPlatform').textContent = study.platform;
+            document.getElementById('modalFocusArea').textContent = study.focusArea || 'N/A (Mock Field)';
+            document.getElementById('modalOmicsType').textContent = study.omicsType;
+            document.getElementById('modalDate').textContent = study.date;
+            document.getElementById('modalDescription').textContent = study.description;
+            
+            detailsModal.classList.add('open');
+            detailsModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; 
+
+            generateSummaryAndGapWithGemini(study);
+
+            // Initialize chatbot for this study
+            const modalChatbotMountPoint = document.getElementById('modalChatbotContainer');
+            const { displayMessage: displayModalMessage } = createChatbotInstance(modalChatbotMountPoint, `Chat about ${study.title}`, study);
+            displayModalMessage('bot', `Hello! I'm here to help you understand ${study.title}. Ask me anything about this study!`);
+        }
+
+        // This is a placeholder function to satisfy the chart's requirement for a click handler, 
+        // even though the live chart is now organism-based and doesn't generate a report.
+        function showYearDetails(year) {
+             console.log(`Clicked on chart data for ${year}. Since the chart is now organism-based, no specific report is generated.`);
+        }
+
+
+        // --- Initial Setup ---
+      
+        window.onload = () => {
+             // The renderMainContent function is now called by the autoAuthenticate flow
+             activateNavTab(document.getElementById('nav-dashboard'), 'dashboard');
+             
+             // Initial load of the default modal structure (so references can be found later)
+             document.querySelector('#detailsModal .modal-content-area').innerHTML = DEFAULT_MODAL_HTML;
+
+             // Initialize main search chatbot
+             const mainChatbotMountPoint = document.getElementById('mainChatbotContainer');
+             const { displayMessage: displayMainMessage } = createChatbotInstance(mainChatbotMountPoint, 'Search Assistant', null, true);
+             displayMainMessage('bot', 'Hello! I am your Aurora Bioscience Search Assistant. I can help you find studies, navigate the app, and even correct your spelling. What can I help you with?');
+
+             // Graph generation event listener
+             document.getElementById('generateGraphButton').addEventListener('click', () => {
+                const comparisonType = document.getElementById('comparisonTypeSelect').value;
+                const graphType = document.getElementById('graphTypeSelect').value;
+                let dataToGraph = [];
+                if (comparisonType === 'omics') {
+                    dataToGraph = aggregatedData.omics;
+                } else if (comparisonType === 'organism') {
+                    dataToGraph = aggregatedData.organisms;
+                }
+                renderDynamicGraph(dataToGraph, comparisonType, graphType);
+             });
+        };
+
+        // Export functions to global scope for use in inline HTML handlers
+        window.activateNavTab = activateNavTab;
+        window.handleGlobalSearch = handleGlobalSearch; 
+        window.fetchAndFilterStudies = fetchAndFilterStudies;
+        window.openStudyDetails = openStudyDetails;
+        window.closeStudyDetails = closeStudyDetails;
+        window.showYearDetails = showYearDetails; // Kept for compatibility, logs a message now.
+    </script>
+    <script type="module">
+        // ... (existing script content) ...
+    </script>
+
+    <!-- Chatbot Template (Hidden by default, cloned for use) -->
+    <template id="chatbotTemplate">
+        <div class="chatbot-container bg-white rounded-lg shadow-lg flex flex-col max-h-96">
+            <div class="chatbot-header bg-primary-blue text-white p-3 rounded-t-lg flex items-center justify-between">
+                <h4 class="font-semibold text-lg" data-chat-title>Chatbot</h4>
+                <button class="close-chatbot text-white hover:text-gray-200">&times;</button>
+            </div>
+            <div class="chatbot-messages flex-1 p-3 overflow-y-auto space-y-2 text-sm">
+                <!-- Messages will be injected here -->
+            </div>
+            <div class="chatbot-input-area p-3 border-t border-gray-200 flex">
+                <input type="text" placeholder="Ask me anything..." class="chatbot-input flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary-blue">
+                <button class="chatbot-send-button bg-primary-blue text-white px-4 py-2 rounded-r-lg hover:bg-light-blue transition">Send</button>
+            </div>
+        </div>
+    </template>
+</body>
+</html>
+<!-- hi -->
+<!-- hello -->

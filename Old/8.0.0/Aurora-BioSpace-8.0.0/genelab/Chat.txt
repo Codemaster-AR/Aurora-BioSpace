@@ -1,0 +1,9 @@
+Feedback will come here:
+Uncaught ReferenceError: Cannot access 'overviewChartsContainer' before initialization
+    at renderMainContent (index.html:656:13)
+    at index.html:490:13
+
+
+
+Gemini is a large language model developed by Google AI. It is capable of understanding and generating human-like text, translating languages, writing different kinds of creative content, and answering your questions in an informative way.
+hello, how cn I HELP YOU TODAY
