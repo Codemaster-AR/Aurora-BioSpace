@@ -1,4 +1,4 @@
-# ⚠️ ARCHIVED & MOVED: homebrew-aurora
+# ⚠️ ARCHIVED & MOVED: Aurora-Biospace
 
 > [!WARNING]
 > **IMPORTANT NOTICE: REPOSITORY MIGRATION** > This repository is now **DEPRECATED**. As part of our consolidation into **Quantal Labs**, both the main application codebase and the Homebrew tap have officially moved to new locations. 
