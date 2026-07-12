@@ -1,51 +1,22 @@
+# ⚠️ ARCHIVED & MOVED: homebrew-aurora
 
-# 🧬 Aurora (aurora-biospace)
+> [!WARNING]
+> **IMPORTANT NOTICE: REPOSITORY MIGRATION** > This repository is now **DEPRECATED**. As part of our consolidation into **Quantal Labs**, both the main application codebase and the Homebrew tap have officially moved to new locations. 
+> 
+> * **New Main Repository:** [github.com/quantal-labs/aurora-biospace](https://github.com/quantal-labs/aurora-biospace)
+> * **New Homebrew Tap:** [github.com/quantal-labs/homebrew-aurora-biospace](https://github.com/quantal-labs/homebrew-aurora-biospace)
+>
+> Please update your remotes, dependencies, and tap tracking accordingly. This legacy repository will no longer receive updates.
 
-Aurora is a specialized toolset designed for bioscience applications search using the NASA OSDR API. Uses Google Auth to get Gemini-powered results with Google search grounding.
+---
 
-[](https://opensource.org/licenses/MIT)
-[](https://github.com/Codemaster-AR/aurora-biospace)
+## 🚚 Migration Guide
 
-## 🔗 Repository Links
+If you previously used or tracked this legacy tap, please transition to the official Quantal Labs organization taps using the steps below.
 
-  * **Tap Repository:** [Codemaster-AR/homebrew-aurora-biospace](https://github.com/Codemaster-AR/homebrew-aurora)
-  * **Issues:** [Report a bug](https://www.google.com/search?q=https://github.com/Codemaster-AR/aurora-biospace/issues)
-
------
-
-## 🚀 Installation
-
-Aurora can be installed on **macOS**, **Linux**, and **WSL2 (Windows 11)** using the [Homebrew](https://brew.sh/) package manager.
-
-### Quick Start
-
-Run the following commands in your terminal:
+### 1. Update Your Homebrew Taps
+Untap the old repository and tap into the new one:
 
 ```bash
-# Update Homebrew connections
-brew update
-
-# Add the custom tap to Homebrew
-brew tap codemaster-ar/aurora
-
-# Install the bioscience package
-brew install aurora-bioscience
-```
-
------
-
-## 🛠 Supported Environments
-
-| Environment | Status | Notes |
-| :--- | :--- | :--- |
-| **macOS** | ✅ Supported | Native support for Intel and Apple Silicon. |
-| **Linux** | ✅ Supported | Requires Homebrew for Linux. |
-| **WSL2** | ✅ Supported | Windows 11 recommended for best compatibility. |
-
------
-
-## 📄 License
-
-This project is licensed under the MIT License. See the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
-
------
+brew untap codemaster-ar/aurora
+brew tap quantal-labs/aurora-biospace
